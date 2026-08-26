@@ -1,5 +1,19 @@
 export type CoachType = 'mindset' | 'career' | 'routine' | 'burnout';
 
+export type AwakeningCategory = 'burnout' | 'career' | 'romance' | 'anxiety';
+
+export interface AwakeningScenario {
+  id: AwakeningCategory;
+  name: string;
+  badge: string;
+  theme: string;
+  symptom: string;
+  awakeningGoal: string;
+  mentorPromptExample: string;
+  defenseMechanism: string;
+  iconName: string;
+}
+
 export interface CoachInfo {
   id: CoachType;
   name: string;
@@ -29,6 +43,13 @@ export interface CoachingCategoryInfo {
   starterPrompt: string;
 }
 
+export interface CognitiveDistortionInfo {
+  id: string;
+  name: string;
+  description: string;
+  prescription: string;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -37,6 +58,18 @@ export interface Message {
   actionItem?: string;
   keyTakeaway?: string;
   suggestedTopics?: string[];
+  // Awakening Specific properties
+  paradigmShift?: {
+    oldBelief: string;
+    newPerspective: string;
+  };
+  factVsInterpretation?: {
+    fact: string;
+    interpretation: string;
+  };
+  identifiedDistortion?: string;
+  sharpQuestion?: string;
+  awakeningQuote?: string;
 }
 
 export interface FastLeadInquiry {
@@ -48,6 +81,25 @@ export interface FastLeadInquiry {
   privacyAgreed: boolean;
   createdAt: number;
   status: 'pending' | 'contacted' | 'completed';
+}
+
+export interface AwakeningNoteItem {
+  id: string;
+  userId: string;
+  date: string;
+  category: AwakeningCategory;
+  categoryName: string;
+  title: string;
+  userProblem: string;
+  identifiedDistortion: string;
+  fact: string;
+  interpretation: string;
+  newParadigm: string;
+  sharpQuestion: string;
+  actionMission: string;
+  mentorQuote: string;
+  timestamp: number;
+  isFavorite?: boolean;
 }
 
 export interface GrowthDiaryItem {
@@ -71,9 +123,29 @@ export interface DailyMorningCare {
   topic: string;
   morningMessage: string;
   actionChallenge: string;
+  sharpQuestion?: string;
   isAnswered: boolean;
   userNote?: string;
   isDelivered: boolean;
+}
+
+export interface AwakeningDiagnosisResult {
+  primaryCategory: AwakeningCategory;
+  primaryCategoryName: string;
+  coreVulnerability: string;
+  defenseMechanism: string;
+  cognitiveDistortion: string;
+  currentParadigm: string;
+  awakeningDirection: string;
+  metacognitionScore: number;
+  scores: {
+    burnout: number;
+    career: number;
+    romance: number;
+    anxiety: number;
+  };
+  customAlertPreview: string;
+  recommendedMentorQuote: string;
 }
 
 export interface LifeBalanceScores {
@@ -84,17 +156,17 @@ export interface LifeBalanceScores {
   relationships: number;// 인간관계 & 대화
 }
 
-export type PlanType = 'free_trial' | 'basic' | 'premium';
+export type PlanType = 'free' | 'subscribed';
 
 export interface SubscriptionInfo {
   plan: PlanType;
   status: 'active' | 'expired' | 'canceled';
-  trialDaysLeft: number;
-  trialEndsAt: string;
   currentPeriodEnd: string;
   kakaoNotificationEnabled: boolean;
   notificationTime: string; // e.g. "08:00"
   phoneOrKakaoId?: string;
+  trialDaysLeft?: number;
+  trialEndsAt?: string;
 }
 
 export interface UserProfile {
@@ -103,6 +175,7 @@ export interface UserProfile {
   displayName: string | null;
   photoURL: string | null;
   subscription: SubscriptionInfo;
+  diagnosis?: AwakeningDiagnosisResult;
   createdAt: number;
   lastLoginAt: number;
 }
@@ -139,3 +212,4 @@ export interface UserReviewItem {
   date: string;
   program: string;
 }
+

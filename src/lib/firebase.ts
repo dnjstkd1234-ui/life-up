@@ -56,8 +56,8 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Default user profile
 export const createDefaultProfile = (uid: string, email?: string | null, displayName?: string | null, photoURL?: string | null): UserProfile => {
-  const trialEnds = new Date();
-  trialEnds.setDate(trialEnds.getDate() + 3);
+  const nextMonth = new Date();
+  nextMonth.setMonth(nextMonth.getMonth() + 1);
   
   return {
     uid,
@@ -65,11 +65,9 @@ export const createDefaultProfile = (uid: string, email?: string | null, display
     displayName: displayName || (email ? email.split('@')[0] : '성장하는 라이프업 회원'),
     photoURL: photoURL || null,
     subscription: {
-      plan: 'free_trial',
+      plan: 'free',
       status: 'active',
-      trialDaysLeft: 3,
-      trialEndsAt: trialEnds.toISOString(),
-      currentPeriodEnd: trialEnds.toISOString(),
+      currentPeriodEnd: nextMonth.toISOString(),
       kakaoNotificationEnabled: true,
       notificationTime: '08:00',
       phoneOrKakaoId: '010-****-5678'
