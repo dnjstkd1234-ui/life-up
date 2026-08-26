@@ -1,0 +1,6 @@
+{
+  "name": "라이프업 (LifeUp) - 1:1 맞춤 AI 라이프 코칭 & 성장 멤버십",
+  "description": "지친 일상에 확실한 변화를 선물하는 1:1 맞춤 AI 라이프 코칭, 매일 아침 카카오톡 모닝 케어, 목표 달성 프로그램 및 실시간 무료 상담 신청 포털",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
