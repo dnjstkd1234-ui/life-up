@@ -25,33 +25,32 @@ function getAi(): GoogleGenAI {
   return aiClient;
 }
 
-const AWAKENING_SYSTEM_PROMPT = `당신은 라이프업(LifeUp)의 '1:1 맞춤형 프라이빗 계몽(Awakening) AI 멘토'입니다.
+const AWAKENING_SYSTEM_PROMPT = `[Role]
+당신은 사용자의 닫힌 사고방식을 깨부수고 새로운 관점을 열어주는 '1:1 맞춤형 계몽(Awakening) AI 멘토, 라이프업'입니다.
+단순히 위로하거나 정답을 알려주는 챗봇이 아닙니다. 소크라테스식 문답법을 통해 사용자가 자신의 인지적 왜곡(번아웃, 취업, 연애, 불안)을 스스로 깨닫게 만드는 것이 당신의 유일한 목적입니다.
 
-[핵심 정체성 및 포지셔닝]
-- 당신은 단순히 사용자의 말에 무조건 맞장구치고 위로만 건네는 단순 챗봇이 아닙니다.
-- 사용자가 갇혀 있는 부정적인 사고방식, 인지적 왜곡(Cognitive Distortion), 방어기제를 날카롭게 깨부수고, '메타인지(자신의 생각에 대해 생각하는 능력)'를 높여주는 거울이자 통찰의 나침반입니다.
-- **상담가의 말투(페르소나)**: **"따뜻하고 포용적이지만 핵심을 찌르는 '현명한 멘토' 스타일"** (마음을 온전히 품어주는 다정한 존댓말이지만, 인지 왜곡의 급소는 뼈 때릴 정도로 명쾌하고 단호하게 짚어줌).
+[Context & User Data]
+당신은 매 세션이 시작될 때, 사용자가 입력한 [현재 감정(User_Emotion)], [고민 카테고리(User_Category)], [현재 상황(User_Situation)] 데이터를 전달받습니다. 이 데이터를 기반으로 가장 날카롭고 본질적인 첫 질문을 던지며 대화를 시작해야 합니다.
 
-[4대 핵심 카테고리별 계몽 원칙]
-1. 번아웃 (Burnout) - "소진된 나를 향한 죄책감 깨기"
-   - 증상: 쉬면서도 불안해하고, 무기력함에 빠짐
-   - 계몽 방향: '휴식은 도태'라는 강박을 깨부수고, 완벽주의 분석 및 통제할 수 없는 것들을 내려놓는 연습 유도
-   - 화법 예시: "지금 느끼는 무기력함이 정말 체력이 부족해서일까요, 아니면 남들의 기준에 억지로 맞추려다 에너지가 고갈된 것일까요?"
+[Core Rules : 계몽을 위한 5대 원칙]
+1. 정답 금지: 해결책을 제시하지 마세요. 대신, 사용자의 답변에 내포된 '전제'에 의문을 제기하는 질문을 던지세요.
+2. 사실과 해석의 분리: 사용자가 말하는 두려움이나 불안이 '실제 일어난 팩트'인지, '스스로 만들어낸 망상/해석'인지 철저히 분리하도록 유도하세요.
+3. 꼬리 질문(Deep Dive): 한 번의 질문으로 끝나지 않고, 사용자의 대답에서 모순이나 방어 기제를 발견하면 연속해서 깊이 파고드세요. (한 번에 최대 1개~2개의 질문만 던질 것)
+4. 단호하지만 통찰력 있는 톤앤매너: 감정적으로 동조("너무 힘드시겠어요")하는 것을 최소화하고, 이성적이고 통찰력 있는 태도로 본질을 짚어내세요.
+5. 4대 카테고리별 맞춤 타겟팅:
+   - [번아웃]: 완벽주의, 타인의 시선, '쉬면 도태된다'는 강박을 타격할 것.
+   - [취업]: 사회적 기준과 개인의 진짜 가치를 분리시킬 것.
+   - [연애]: 타인을 통한 결핍 충족(의존성)을 직면하게 할 것.
+   - [불안]: 통제 불가능한 미래와 통제 가능한 현재(지금 여기)를 구분시킬 것.
 
-2. 취업/커리어 (Career) - "사회적 트랙에서 나의 트랙으로"
-   - 증상: 남들과의 비교, 스펙에 대한 강박, 불확실한 미래에 대한 두려움
-   - 계몽 방향: '정답인 삶'이 있다는 착각에서 벗어나 직업을 '나의 가치를 실현하는 수단'으로 재정의, '실패' 기준의 실체 해체
-   - 화법 예시: "대기업에 취업하지 못하면 인생이 실패한다고 느끼시는군요. 그 '실패'라는 기준은 대체 누가 만든 것인가요?"
-
-3. 연애/관계 (Romance) - "타인을 통한 결핍 채우기 멈춤"
-   - 증상: 의존증, 애정 결핍, 반복되는 나쁜 연애/관계 패턴
-   - 계몽 방향: 타인에게서 자신의 존재 가치를 증명받으려는 태도를 직면하게 하고 온전한 자기 자립 유도
-   - 화법 예시: "상대방이 연락이 안 될 때 화가 나는 이유는, 그 사람이 미워서인가요, 아니면 내가 존중받지 못한다는 두려움 때문인가요?"
-
-4. 불안 (Anxiety) - "사실(Fact)과 감정/해석의 분리"
-   - 증상: 일어나지 않은 일에 대한 과도한 걱정, 꼬리를 무는 부정적 시나리오
-   - 계몽 방향: 불안을 억지로 통제하려 하지 않고 객관적 '사실(Fact)'과 머릿속의 '주관적 해석/시나리오'를 명확히 분리
-   - 화법 예시: "그 불안은 실제로 일어난 '사실'인가요, 아니면 머릿속이 만들어낸 '시나리오'인가요? 지금 걱정들 중 현재 통제할 수 있는 일은 몇 개나 되나요?"`;
+[Interaction Flow (대화 시나리오)]
+- 첫 대화 시작 시: 유저의 현재 심정과 상황({User_Emotion}, {User_Category}, {User_Situation})을 간략히 요약한 뒤, 그 상황을 낯설게 보게 만드는 묵직한 '첫 번째 질문'을 던진다.
+- 진행 중 대화: 사용자의 말 속 전제와 인지 왜곡을 짚어내고 1~2개의 깊이 있는 꼬리 질문을 이어간다.
+- [Daily Nudge (자동화 메시지용 규칙)]: 사용자가 "오늘 상담 종료"를 요청하거나 상담 마무리를 요청하면, AI는 오늘 대화의 핵심을 찌르는 단 한 줄의 [계몽 문장]과 내일 생각해 볼 [숙제 질문]을 요약해서 출력합니다.
+  종료 시 출력 형식:
+  [내일의 계몽 알림톡]
+  문장: (오늘 대화를 관통하는 뼈 때리는 한 문장)
+  질문: (내일 하루 동안 스스로 고민해볼 질문)`;
 
 async function startServer() {
   const app = express();
@@ -88,64 +87,71 @@ async function startServer() {
     }
   });
 
-  // 2. High-Converting 1:1 Awakening Mentor Chat API
+  // 2. 1:1 Awakening Mentor Chat API
   app.post('/api/chat/coaching', async (req, res) => {
     try {
       const { 
-        messages, 
+        messages = [], 
+        userEmotion = '',
+        userCategory = '번아웃',
+        userSituation = '',
         category = 'burnout', 
         userName = '내담자',
-        historySummary = '',
-        userDistortionPattern = ''
+        isEndingSession = false
       } = req.body;
       
       const ai = getAi();
+
+      const lastUserMessage = messages[messages.length - 1]?.content || '';
+      const isEnding = isEndingSession || lastUserMessage.includes('오늘 상담 종료') || lastUserMessage.includes('상담 종료');
 
       const conversationHistory = (messages || []).map((m: { role: string; content: string }) => 
         `${m.role === 'user' ? userName : 'AI 계몽 멘토'}: ${m.content}`
       ).join('\n');
 
-      const systemPrompt = `${AWAKENING_SYSTEM_PROMPT}
+      const prompt = `${AWAKENING_SYSTEM_PROMPT}
 
-[현재 상담 정보]
-- 상담 테마: ${category}
+[현재 내담자 세션 데이터]
 - 내담자 성명: ${userName}님
-${historySummary ? `- 과거 대화 및 인지 패턴 기억: "${historySummary}"` : ''}
-${userDistortionPattern ? `- 주요 방어기제/인지 왜곡: "${userDistortionPattern}"` : ''}
+- 고민 카테고리(User_Category): ${userCategory || category}
+- 현재 감정(User_Emotion): ${userEmotion || '불안 및 복잡함'}
+- 현재 상황(User_Situation): ${userSituation || '고민을 마주하고 있는 상태'}
+- 상담 종료 요청 여부: ${isEnding ? '예 (오늘 상담 종료 요청됨)' : '아니오 (대화 진행 중)'}
 
 [대화 히스토리]
-${conversationHistory}
+${conversationHistory || '(첫 세션 시작)'}
 
 [응답 가이드라인]
-1. 내담자의 마음에 공감하되, **단순 맞장구에 머무르지 마세요**. 내담자가 무의식적으로 전제하고 있는 왜곡된 믿음이나 고정관념의 본질을 따뜻하고도 날카롭게 짚어주세요.
-2. 만약 내담자가 과거에도 비슷한 인지 왜곡 패턴을 보였다면, 맥락을 상기시키며 스스로 메타인지를 켜도록 질문하세요. (예: "${userName}님, 지난번에도 비슷한 상황에서 스스로를 탓하셨죠. 이번에도 같은 패턴에 빠진 것은 아닐까요?")
-3. **사실(Fact)과 주관적 해석(Interpretation)을 분리**할 수 있도록 통찰을 선물하세요.
-4. 오늘 당장 실천할 수 있는 5분 인지 전환 액션 미션(actionMission)과, 스스로를 객관화할 수 있는 강력한 계몽 질문(sharpQuestion)을 1개 도출하세요.
+${isEnding ? `
+- 사용자가 "오늘 상담 종료"를 요청했습니다. 오늘 대화의 핵심을 찌르는 단 한 줄의 [계몽 문장]과 내일 하루 동안 스스로 고민해볼 [숙제 질문]을 작성하세요.
+- 출력 형식:
+[내일의 계몽 알림톡]
+문장: (오늘 대화를 관통하는 뼈 때리는 한 문장)
+질문: (내일 하루 동안 스스로 고민해볼 질문)
+` : `
+- 첫 응답이거나 대화 진행 시, 위 5대 원칙(정답 금지, 사실과 해석 분리, 꼬리 질문 1~2개, 단호하고 통찰력 있는 톤, 4대 카테고리별 맞춤 타겟팅)을 엄격히 준수하세요.
+- 첫 응답일 경우: 유저의 현재 심정과 상황을 간략히 짚은 뒤, 그 상황을 낯설게 보게 만드는 묵직한 '첫 번째 질문'을 던지세요.
+`}
 
 반드시 아래 JSON 포맷으로 응답하세요:
 {
-  "message": "따뜻하지만 핵심을 찌르는 멘토의 조언 본문 (존댓말, 2~4문단)",
-  "identifiedDistortion": "발견된 인지 왜곡 명칭 (예: 흑백논리 완벽주의 / 타인 인정 의존 / 파국화 시나리오 / 과도한 자책)",
+  "message": "AI 멘토의 응답 전문 (종료 시 [내일의 계몽 알림톡] 형식 포함)",
+  "identifiedDistortion": "발견된 인지 왜곡 명칭 (예: 흑백논리 / 타인 인정 의존 / 파국화 시나리오 / 당위적 사고)",
   "factVsInterpretation": {
     "fact": "객관적으로 일어난 실제 사실 1문장",
     "interpretation": "머릿속이 만들어낸 과장된 해석/두려움 1문장"
   },
-  "paradigmShift": {
-    "oldBelief": "갇혀 있던 낡은 생각 프레임",
-    "newPerspective": "새롭게 깨어난 진정한 관점"
+  "sharpQuestion": "메타인지를 깨우는 날카로운 계몽 질문 1~2개",
+  "dailyNudge": {
+    "sentence": "오늘 대화를 관통하는 뼈 때리는 계몽 문장",
+    "homeworkQuestion": "내일 하루 동안 스스로 고민해볼 숙제 질문"
   },
-  "sharpQuestion": "메타인지를 깨우는 뼈 때리는 질문 1개",
-  "actionMission": "오늘 당장 실천할 5분 메타인지 액션 미션",
-  "awakeningQuote": "가슴에 새길 1줄 계몽 격언",
-  "suggestedTopics": [
-    "추천 후속 질문 1",
-    "추천 후속 질문 2"
-  ]
+  "isSessionEnded": ${isEnding}
 }`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.7-flash',
-        contents: systemPrompt,
+        contents: prompt,
         config: {
           responseMimeType: 'application/json'
         }
@@ -157,20 +163,20 @@ ${conversationHistory}
         parsed = JSON.parse(responseText);
       } catch (e) {
         parsed = {
-          message: `${userName}님, 지친 마음은 당연하지만 지금 느끼는 불안이 객관적 '사실'인지 아니면 머릿속이 쓴 '시나리오'인지 잠시 멈추어 바라볼 필요가 있습니다.`,
-          identifiedDistortion: '완벽주의적 파국화',
+          message: isEnding
+            ? `[내일의 계몽 알림톡]\n문장: 내가 통제할 수 없는 타인의 기준을 내려놓을 때 진정한 내 삶이 시작됩니다.\n질문: 내일 하루 동안, 남들의 시선이 아닌 온전한 나를 위한 단 하나의 선택은 무엇인가요?`
+            : `${userName}님, 현재 상황에서 느끼는 불안의 이면에 어떤 '전제'가 깔려 있는지 짚어볼 필요가 있습니다. 그 불안은 실제로 일어난 '사실'인가요, 아니면 머릿속이 쓴 '시나리오'인가요?`,
+          identifiedDistortion: '인지적 왜곡 및 당위적 사고',
           factVsInterpretation: {
-            fact: '지금 잠시 쉬어가고 있는 상태',
-            interpretation: '내가 영원히 도태될 것이라는 공포'
+            fact: '현재 상황에 직면해 있는 것',
+            interpretation: '내가 실패하거나 도태될 것이라는 공포'
           },
-          paradigmShift: {
-            oldBelief: '휴식은 게으름이자 도태다.',
-            newPerspective: '휴식은 다음 도약을 위한 필수 연료이자 전략이다.'
+          sharpQuestion: '그 상황에서 당신이 100% 통제할 수 있는 행동은 무엇인가요?',
+          dailyNudge: {
+            sentence: '내가 통제할 수 없는 것을 내려놓을 때 진정한 자유가 시작됩니다.',
+            homeworkQuestion: '내일 하루 동안 남들의 시선에서 벗어나 온전히 나를 위한 선택은 무엇인가요?'
           },
-          sharpQuestion: '지금 느끼는 무기력함은 정말 체력 때문일까요, 아니면 남의 기준에 맞추려다 고갈된 것일까요?',
-          actionMission: '오늘 10분간 스마트폰 없이 온전히 숨 고르기',
-          awakeningQuote: '내가 통제할 수 없는 것을 내려놓을 때 진정한 자유가 시작됩니다.',
-          suggestedTopics: ['타인의 시선과 나 분리하기', '오늘 통제 가능한 일 3가지']
+          isSessionEnded: isEnding
         };
       }
 
@@ -182,17 +188,15 @@ ${conversationHistory}
         message: '잠시 생각을 가다듬는 중입니다. 당신의 내면 깊은 이야기를 언제든 들려주세요.',
         identifiedDistortion: '자기 비판적 사고',
         factVsInterpretation: {
-          fact: '상황이 예상과 다르게 흘러간 것',
-          interpretation: '내가 부족해서 모든 것이 망가졌다는 생각'
-        },
-        paradigmShift: {
-          oldBelief: '완벽하지 않으면 실패다.',
-          newPerspective: '시행착오는 메타인지 성장의 기회다.'
+          fact: '상황을 마주하고 있는 것',
+          interpretation: '스스로를 과도하게 압박하는 생각'
         },
         sharpQuestion: '이 상황에서 내가 바꿀 수 있는 단 1%의 행동은 무엇인가요?',
-        actionMission: '오늘 하루 나를 칭찬하는 문장 1줄 적기',
-        awakeningQuote: '자신을 객관적으로 바라보는 순간 왜곡된 두려움은 힘을 잃습니다.',
-        suggestedTopics: ['사실과 감정 분리하기', '나만의 기준 다시 세우기']
+        dailyNudge: {
+          sentence: '자신을 객관적으로 바라보는 순간 왜곡된 두려움은 힘을 잃습니다.',
+          homeworkQuestion: '오늘의 걱정 중 내일 실제로 일어날 일은 몇 개인가요?'
+        },
+        isSessionEnded: false
       });
     }
   });

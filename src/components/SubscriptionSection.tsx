@@ -14,16 +14,16 @@ export const SubscriptionSection: React.FC<SubscriptionSectionProps> = ({
   const isSubscribed = user?.subscription?.plan === 'subscribed';
 
   return (
-    <section id="pricing" className="py-20 bg-stone-50 border-b border-stone-200">
+    <section id="pricing" className="py-20 bg-white border-b border-stone-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
         {/* Header */}
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <span className="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100">
-            Membership Plan
+            2. 구독하기 (월 6,500원)
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold font-serif text-stone-900">
-            단 하나의 합리적인 구독 플랜
+            단 하나의 합리적인 올인원 구독
           </h2>
           <p className="text-xs sm:text-sm text-stone-600">
             하루 약 200원으로 24시간 언제 어디서나 나만의 AI 계몽 멘토를 곁에 두세요.

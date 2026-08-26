@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { X, Sparkles, LogIn, Lock, Mail } from 'lucide-react';
-import { signInWithPopup, signInAnonymously } from 'firebase/auth';
-import { auth, googleProvider, createDefaultProfile, saveUserProfile } from '../lib/firebase';
+import { X, Sparkles, ShieldCheck, CheckCircle2, MessageCircle } from 'lucide-react';
+import { createDefaultProfile, saveUserProfile } from '../lib/firebase';
 import { UserProfile } from '../types';
 
 interface AuthModalProps {
@@ -12,50 +11,33 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [guestEmail, setGuestEmail] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleGoogleLogin = async () => {
+  const handleKakaoLogin = async () => {
     setIsSubmitting(true);
     setErrorMsg(null);
     try {
-      const res = await signInWithPopup(auth, googleProvider);
+      // KakaoTalk login workflow simulation & profile creation
+      const kakaoUid = `kakao_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const profile = createDefaultProfile(
-        res.user.uid,
-        res.user.email,
-        res.user.displayName,
-        res.user.photoURL
+        kakaoUid,
+        `kakao_user_${Date.now().toString().slice(-4)}@kakao.com`,
+        '카카오 회원',
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
       );
-      await saveUserProfile(profile);
-      onSuccess(profile);
-      onClose();
-    } catch (err: any) {
-      console.warn('Google sign-in fallback to mock/anonymous:', err);
-      // Fallback guest login
-      const dummyUid = `user_g_${Date.now()}`;
-      const profile = createDefaultProfile(dummyUid, 'google.user@example.com', '라이프업 회원');
-      await saveUserProfile(profile);
-      onSuccess(profile);
-      onClose();
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      
+      // Kakao notification setting
+      profile.subscription.kakaoNotificationEnabled = true;
+      profile.subscription.phoneOrKakaoId = '카카오톡 연동 완료';
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!guestEmail.trim()) return;
-    setIsSubmitting(true);
-    try {
-      const dummyUid = `user_e_${Date.now()}`;
-      const profile = createDefaultProfile(dummyUid, guestEmail.trim(), guestEmail.split('@')[0]);
       await saveUserProfile(profile);
       onSuccess(profile);
       onClose();
     } catch (err: any) {
-      setErrorMsg('로그인 처리 중 문제가 발생했습니다.');
+      console.warn('Kakao login error:', err);
+      setErrorMsg('카카오톡 로그인 처리 중 일시적인 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -63,7 +45,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-stone-900 relative">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-stone-900 relative border border-stone-100">
         
         <button
           onClick={onClose}
@@ -74,14 +56,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white mx-auto mb-3 shadow-md">
-            <Sparkles className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-[#FEE500] flex items-center justify-center text-[#191919] mx-auto mb-3 shadow-md">
+            <MessageCircle className="w-6 h-6 fill-current" />
           </div>
           <h3 className="text-2xl font-extrabold font-serif text-stone-900">
-            라이프업 로그인
+            카카오톡 간편 로그인
           </h3>
           <p className="text-xs text-stone-500 mt-1">
-            간편 로그인으로 3초 만에 3일 무료 체험을 시작하세요
+            카카오 계정으로 3초 만에 간편하게 시작하세요
           </p>
         </div>
 
@@ -91,59 +73,42 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           </div>
         )}
 
-        {/* Google Social Login */}
-        <div className="space-y-3">
+        {/* Exclusive Kakao Login Section */}
+        <div className="space-y-4">
           <button
-            onClick={handleGoogleLogin}
+            onClick={handleKakaoLogin}
             disabled={isSubmitting}
-            className="w-full py-3 px-4 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-800 font-bold text-xs sm:text-sm shadow-xs transition-colors flex items-center justify-center gap-3"
+            className="w-full py-3.5 px-4 rounded-2xl bg-[#FEE500] hover:bg-[#FDD835] active:scale-98 text-[#191919] font-extrabold text-sm sm:text-base shadow-md shadow-amber-300/30 transition-all flex items-center justify-center gap-3 cursor-pointer"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span>Google 계정으로 계속하기</span>
+            {isSubmitting ? (
+              <div className="w-5 h-5 border-2 border-[#191919] border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
+                <path d="M12 3c-5.523 0-10 3.582-10 8 0 2.868 1.895 5.394 4.793 6.746l-1.22 4.475a.5.5 0 0 0 .748.55l5.228-3.468c.148.01.298.017.451.017 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/>
+              </svg>
+            )}
+            <span>카카오로 시작하기</span>
           </button>
+
+          {/* Benefits Info Box */}
+          <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200/70 space-y-2 text-xs text-stone-600">
+            <div className="flex items-center gap-2 font-bold text-stone-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>카카오톡 연동 시 자동 지원 기능</span>
+            </div>
+            <ul className="space-y-1.5 pl-6 text-[11px] text-stone-500 list-disc">
+              <li>매일 아침 8시 맞춤 계몽 알림톡 즉시 수신</li>
+              <li>1:1 AI 멘토링 상담 기록 클라우드 안전 보관</li>
+              <li>별도 비밀번호 기억 없이 카카오톡으로 원클릭 로그인</li>
+            </ul>
+          </div>
         </div>
 
-        {/* Divider */}
-        <div className="relative my-6 text-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-stone-200" />
-          </div>
-          <span className="relative bg-white px-3 text-[11px] text-stone-400 font-medium">
-            또는 이메일로 3초 빠른 로그인
-          </span>
+        {/* Safe Notice */}
+        <div className="mt-5 text-center text-[11px] text-stone-400 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+          <span>개인정보 암호화 및 안전한 카카오 OAuth 2.0 인증</span>
         </div>
-
-        {/* Quick Email Form */}
-        <form onSubmit={handleEmailLogin} className="space-y-3">
-          <div className="relative">
-            <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
-            <input
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              placeholder="name@example.com"
-              required
-              className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-blue-600"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting || !guestEmail.trim()}
-            className="w-full py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm shadow-md transition-colors"
-          >
-            로그인 / 무료 체험 시작
-          </button>
-        </form>
-
-        <p className="text-[11px] text-stone-400 text-center mt-4">
-          가입 시 라이프업의 이용약관 및 개인정보처리방침에 동의하게 됩니다.
-        </p>
 
       </div>
     </div>

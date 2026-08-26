@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Briefcase, Heart, AlertCircle, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { Flame, Briefcase, Heart, AlertCircle } from 'lucide-react';
 
 export const AwakeningThemesSection: React.FC = () => {
   const themes = [
@@ -50,20 +50,20 @@ export const AwakeningThemesSection: React.FC = () => {
   ];
 
   return (
-    <section id="themes" className="py-20 bg-stone-50 border-b border-stone-200">
+    <section id="consulting" className="py-20 bg-stone-50 border-b border-stone-200">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <span className="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100">
-            4 Core Pillars
+            3. 상담 설명 (4대 계몽 테마)
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold font-serif text-stone-900 leading-snug">
             당신이 갇혀 있는 왜곡된 생각의 굴레를 <br className="hidden sm:inline" />
             명쾌하게 깨뜨려 드립니다
           </h2>
           <p className="text-sm text-stone-600">
-            어떤 고민이든 본질은 동일합니다. 무의식적 인지 왜곡을 짚어내어 스스로 답을 찾게 돕습니다.
+            어떤 고민이든 본질은 동일합니다. 무의식적 인지 왜곡을 짚어내어 스스로 답을 찾게 돕는 1:1 맞춤 상담입니다.
           </p>
         </div>
 

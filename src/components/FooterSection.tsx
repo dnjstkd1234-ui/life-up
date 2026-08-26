@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Phone, Mail, ShieldCheck } from 'lucide-react';
+import { Sparkles, Mail, ShieldCheck } from 'lucide-react';
 
 interface FooterSectionProps {
   onNavigate: (sectionId: string) => void;
@@ -13,16 +13,16 @@ export const FooterSection: React.FC<FooterSectionProps> = ({
   return (
     <footer className="bg-stone-950 text-stone-400 text-xs border-t border-stone-800">
       
-      {/* Sub Footer Nav Bar */}
+      {/* Sub Footer Nav Bar in Exact Order */}
       <div className="border-b border-stone-800/80 py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
-          {/* Quick Nav Links */}
+          {/* Quick Nav Links: 서비스소개 -> 구독하기 -> 상담설명 -> 카카오톡 대화 */}
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-stone-300 font-medium">
-            <button onClick={() => onNavigate('intro')} className="hover:text-white transition-colors">서비스 소개</button>
-            <button onClick={() => onNavigate('themes')} className="hover:text-white transition-colors">4대 계몽 테마</button>
-            <button onClick={() => onNavigate('kakao')} className="hover:text-white transition-colors">카카오톡 맞춤 알림</button>
-            <button onClick={onOpenPricing} className="hover:text-white transition-colors">구독 안내 (월 6,500원)</button>
+            <button onClick={() => onNavigate('intro')} className="hover:text-white transition-colors">1. 서비스 소개</button>
+            <button onClick={onOpenPricing} className="hover:text-white transition-colors">2. 구독하기 (월 6,500원)</button>
+            <button onClick={() => onNavigate('consulting')} className="hover:text-white transition-colors">3. 상담 설명</button>
+            <button onClick={() => onNavigate('kakao')} className="hover:text-white transition-colors">4. 카카오톡 대화</button>
           </div>
 
           <div className="text-[11px] text-stone-500 flex items-center gap-1.5">

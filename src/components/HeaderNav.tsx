@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, User, LogOut, Menu, X, CreditCard } from 'lucide-react';
+import { Sparkles, LogOut, Menu, X, CreditCard } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface HeaderNavProps {
@@ -21,11 +21,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Exact requested order: 서비스소개 -> 구독하기 -> 상담설명 -> 카카오톡 대화
   const navItems = [
     { id: 'intro', label: '서비스 소개' },
-    { id: 'themes', label: '4대 계몽 테마' },
-    { id: 'kakao', label: '카카오톡 맞춤 케어' },
-    { id: 'pricing', label: '구독 플랜 (월 6,500원)' },
+    { id: 'pricing', label: '구독하기' },
+    { id: 'consulting', label: '상담 설명' },
+    { id: 'kakao', label: '카카오톡 대화' },
   ];
 
   return (
@@ -35,7 +36,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           
           {/* Brand Logo */}
           <div 
-            onClick={() => onNavigate('hero')}
+            onClick={() => onNavigate('intro')}
             className="flex items-center gap-3 cursor-pointer group shrink-0 select-none"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
@@ -50,7 +51,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             </div>
           </div>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav Links in Exact Sequence */}
           <nav className="hidden md:flex items-center gap-8 h-full">
             {navItems.map(item => (
               <button
@@ -89,9 +90,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="h-10 text-xs font-semibold text-stone-600 hover:text-stone-900 px-3 rounded-xl hover:bg-stone-100 transition-colors flex items-center justify-center whitespace-nowrap"
+                className="h-10 text-xs font-bold text-[#191919] bg-[#FEE500] hover:bg-[#FDD835] px-3.5 rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
               >
-                로그인
+                <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M12 3c-5.523 0-10 3.582-10 8 0 2.868 1.895 5.394 4.793 6.746l-1.22 4.475a.5.5 0 0 0 .748.55l5.228-3.468c.148.01.298.017.451.017 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/>
+                </svg>
+                <span>카카오 로그인</span>
               </button>
             )}
 
@@ -162,9 +166,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   onOpenAuth();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold"
+                className="w-full py-2.5 rounded-xl bg-[#FEE500] hover:bg-[#FDD835] text-[#191919] text-xs font-bold flex items-center justify-center gap-2 shadow-2xs"
               >
-                로그인 / 회원가입
+                <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M12 3c-5.523 0-10 3.582-10 8 0 2.868 1.895 5.394 4.793 6.746l-1.22 4.475a.5.5 0 0 0 .748.55l5.228-3.468c.148.01.298.017.451.017 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/>
+                </svg>
+                <span>카카오톡으로 시작하기</span>
               </button>
             )}
           </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { HeaderNav } from './components/HeaderNav';
 import { SimpleHeroSection } from './components/SimpleHeroSection';
+import { SubscriptionSection } from './components/SubscriptionSection';
 import { AwakeningThemesSection } from './components/AwakeningThemesSection';
 import { KakaoCareSection } from './components/KakaoCareSection';
-import { SubscriptionSection } from './components/SubscriptionSection';
 import { FooterSection } from './components/FooterSection';
 
 import { PricingModal } from './components/PricingModal';
@@ -39,18 +39,11 @@ export default function App() {
 
   const handleNavigate = (sectionId: string) => {
     setActiveSection(sectionId);
-    if (sectionId === 'pricing') {
-      const elem = document.getElementById('pricing');
-      if (elem) {
-        elem.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        setIsPricingModalOpen(true);
-      }
-      return;
-    }
     const elem = document.getElementById(sectionId);
     if (elem) {
       elem.scrollIntoView({ behavior: 'smooth' });
+    } else if (sectionId === 'pricing') {
+      setIsPricingModalOpen(true);
     }
   };
 
@@ -87,7 +80,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
-      {/* 1. Simple, Clean Header */}
+      {/* 1. Header Navigation (서비스소개 -> 구독하기 -> 상담설명 -> 카카오톡 대화) */}
       <HeaderNav
         user={user}
         activeSection={activeSection}
@@ -97,31 +90,31 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area in Exact Order */}
       <main className="flex-1">
         
-        {/* 2. Hero Section */}
+        {/* 1. 서비스 소개 (Intro & Hero) */}
         <SimpleHeroSection
           onOpenPricing={() => setIsPricingModalOpen(true)}
         />
 
-        {/* 3. 4 Core Awakening Themes */}
-        <AwakeningThemesSection />
-
-        {/* 4. Daily Kakao Care Alert Section */}
-        <KakaoCareSection
-          onOpenPricing={() => setIsPricingModalOpen(true)}
-        />
-
-        {/* 5. Subscription Plan Section (월 6,500원) */}
+        {/* 2. 구독하기 (Membership Subscription - 월 6,500원) */}
         <SubscriptionSection
           user={user}
           onOpenPricing={() => setIsPricingModalOpen(true)}
         />
 
+        {/* 3. 상담 설명 (4대 핵심 계몽 테마 & 1:1 코칭 솔루션) */}
+        <AwakeningThemesSection />
+
+        {/* 4. 카카오톡 대화 (데일리 맞춤 알림 및 1:1 대화 케어) */}
+        <KakaoCareSection
+          onOpenPricing={() => setIsPricingModalOpen(true)}
+        />
+
       </main>
 
-      {/* 6. Clean Footer */}
+      {/* Footer */}
       <FooterSection
         onNavigate={handleNavigate}
         onOpenPricing={() => setIsPricingModalOpen(true)}
