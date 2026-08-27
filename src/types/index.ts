@@ -156,7 +156,18 @@ export interface LifeBalanceScores {
   relationships: number;// 인간관계 & 대화
 }
 
-export type PlanType = 'free' | 'subscribed';
+export type PlanType = 'free' | 'basic' | 'premium' | 'subscribed';
+
+export type InnerEmotion = '무기력함' | '억울함' | '두려움' | '공허함' | '조급함' | '답답함' | '분노' | '죄책감';
+
+export type InnerCategory = '번아웃' | '취업·진로' | '연애·관계' | '불안·강박';
+
+export interface InnerStateDiagnosis {
+  emotion: InnerEmotion | string;
+  category: InnerCategory;
+  troublingSentence: string;
+  updatedAt?: number;
+}
 
 export interface SubscriptionInfo {
   plan: PlanType;
@@ -175,6 +186,7 @@ export interface UserProfile {
   displayName: string | null;
   photoURL: string | null;
   subscription: SubscriptionInfo;
+  innerDiagnosis?: InnerStateDiagnosis;
   diagnosis?: AwakeningDiagnosisResult;
   createdAt: number;
   lastLoginAt: number;

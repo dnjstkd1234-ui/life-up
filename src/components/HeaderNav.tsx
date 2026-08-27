@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, LogOut, Menu, X, CreditCard } from 'lucide-react';
+import { Sparkles, LogOut, Menu, X, CreditCard, User, Compass } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface HeaderNavProps {
@@ -8,6 +8,7 @@ interface HeaderNavProps {
   onNavigate: (sectionId: string) => void;
   onOpenAuth: () => void;
   onOpenPricing: () => void;
+  onOpenMyPage: () => void;
   onLogout: () => void;
 }
 
@@ -17,6 +18,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   onNavigate,
   onOpenAuth,
   onOpenPricing,
+  onOpenMyPage,
   onLogout
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,6 +30,10 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
     { id: 'consulting', label: '상담 설명' },
     { id: 'kakao', label: '카카오톡 대화' },
   ];
+
+  const plan = user?.subscription?.plan;
+  const isSubscribed = plan === 'basic' || plan === 'premium' || plan === 'subscribed';
+  const isLoggedIn = user && user.email;
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-2xs">
@@ -47,12 +53,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 <span className="font-extrabold text-xl sm:text-2xl text-stone-900 tracking-tight font-serif">라이프업</span>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-blue-100 text-blue-700">LifeUp</span>
               </div>
-              <p className="text-[10px] text-stone-500 tracking-wider font-sans font-medium mt-1 leading-none">1:1 맞춤 AI 계몽 멘토링</p>
+              <p className="text-[10px] text-stone-500 tracking-wider font-sans font-medium mt-1 leading-none">1:1 개인 맞춤형 AI멘토링</p>
             </div>
           </div>
 
           {/* Desktop Nav Links in Exact Sequence */}
-          <nav className="hidden md:flex items-center gap-8 h-full">
+          <nav className="hidden md:flex items-center gap-7 h-full">
             {navItems.map(item => (
               <button
                 key={item.id}
@@ -72,11 +78,25 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="hidden sm:flex items-center gap-3 shrink-0">
+          <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+            
+            {/* MyPage Button */}
+            <button
+              onClick={onOpenMyPage}
+              className={`h-10 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap border ${
+                activeSection === 'mypage'
+                  ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
+                  : 'bg-stone-50 hover:bg-stone-100 text-stone-800 border-stone-200'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5 text-blue-600" />
+              <span>마이페이지 {isSubscribed ? '· 진단' : ''}</span>
+            </button>
+
             {/* Auth or Profile */}
-            {user && user.email ? (
-              <div className="flex items-center gap-2 pr-2 border-r border-stone-200 h-8">
-                <span className="text-xs font-medium text-stone-700 max-w-[120px] truncate leading-none">
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2 pr-1 border-r border-stone-200 h-8">
+                <span className="text-xs font-medium text-stone-700 max-w-[100px] truncate leading-none">
                   {user.displayName || '회원'}님
                 </span>
                 <button
@@ -84,7 +104,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                   className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition-colors flex items-center justify-center"
                   title="로그아웃"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
@@ -102,20 +122,24 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             {/* Subscribe Action Button */}
             <button
               onClick={onOpenPricing}
-              className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap"
+              className={`h-10 px-3.5 rounded-xl text-xs font-bold shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                isSubscribed 
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+              }`}
             >
               <CreditCard className="w-3.5 h-3.5" />
-              <span>구독하기 (월 6,500원)</span>
+              <span>{isSubscribed ? '구독 관리' : '구독하기'}</span>
             </button>
           </div>
 
           {/* Mobile Hamburger */}
           <div className="flex md:hidden items-center gap-2">
             <button
-              onClick={onOpenPricing}
-              className="h-9 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1"
+              onClick={onOpenMyPage}
+              className="h-9 px-3 rounded-lg bg-stone-900 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1"
             >
-              <span>구독하기</span>
+              <span>마이페이지</span>
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -144,12 +168,23 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 {item.label}
               </button>
             ))}
+
+            <button
+              onClick={() => {
+                onOpenMyPage();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left py-2.5 px-3 rounded-lg text-sm font-bold text-blue-600 bg-blue-50 flex items-center justify-between"
+            >
+              <span>마이페이지 (내면 진단 & AI 상담)</span>
+              <Compass className="w-4 h-4" />
+            </button>
           </div>
 
           <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-            {user && user.email ? (
+            {isLoggedIn ? (
               <div className="flex items-center justify-between w-full">
-                <span className="text-xs font-medium text-stone-700">{user.displayName || user.email}님</span>
+                <span className="text-xs font-medium text-stone-700">{user?.displayName || user?.email}님</span>
                 <button
                   onClick={() => {
                     onLogout();

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Check, ArrowRight, ShieldCheck, HeartHandshake, BellRing, BrainCircuit } from 'lucide-react';
+import { Sparkles, Check, ArrowRight, ShieldCheck, HeartHandshake, BellRing, BrainCircuit, Crown } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface SubscriptionSectionProps {
@@ -11,116 +11,152 @@ export const SubscriptionSection: React.FC<SubscriptionSectionProps> = ({
   user,
   onOpenPricing
 }) => {
-  const isSubscribed = user?.subscription?.plan === 'subscribed';
+  const plan = user?.subscription?.plan;
+  const isSubscribed = plan === 'basic' || plan === 'premium' || plan === 'subscribed';
 
   return (
     <section id="pricing" className="py-20 bg-white border-b border-stone-200">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Header */}
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <span className="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100">
-            2. 구독하기 (월 6,500원)
+            2. 구독하기 (정기결제)
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold font-serif text-stone-900">
-            단 하나의 합리적인 올인원 구독
+            내게 맞는 정기구독 플랜 선택
           </h2>
           <p className="text-xs sm:text-sm text-stone-600">
-            하루 약 200원으로 24시간 언제 어디서나 나만의 AI 계몽 멘토를 곁에 두세요.
+            카카오 로그인 후 원클릭 정기결제로 24시간 언제 어디서나 1:1 맞춤 AI 계몽 멘토를 곁에 두세요.
           </p>
         </div>
 
-        {/* Pricing Card */}
-        <div className="bg-gradient-to-b from-blue-50/70 via-white to-sky-50/30 rounded-3xl p-6 sm:p-10 border-2 border-blue-500 shadow-xl relative max-w-xl mx-auto space-y-6">
+        {/* Pricing Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           
-          <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-blue-100 pb-5">
-            <div>
-              <span className="text-xs font-bold text-blue-600">월간 정기 구독</span>
-              <h3 className="text-2xl font-extrabold text-stone-900 mt-0.5">라이프업 멤버십</h3>
-              <p className="text-xs text-stone-500 mt-0.5">1:1 맞춤 계몽 코칭 & 카카오톡 데일리 케어</p>
-            </div>
-
-            <div className="text-left sm:text-right">
-              <div className="text-3xl sm:text-4xl font-extrabold text-blue-600 font-sans tracking-tight">
-                6,500<span className="text-lg font-bold text-stone-800">원</span>
-              </div>
-              <span className="text-xs font-medium text-stone-500"> / 월 (구독)</span>
-            </div>
-          </div>
-
-          {/* Benefits */}
-          <div className="space-y-3.5">
-            <span className="text-xs font-bold text-stone-800 block">✨ 포함된 모든 혜택</span>
+          {/* 1. Basic Plan (월 6,500원) */}
+          <div className="bg-gradient-to-b from-blue-50/60 via-white to-sky-50/20 rounded-3xl p-6 sm:p-8 border-2 border-blue-500 shadow-xl relative flex flex-col justify-between space-y-6">
             
-            <ul className="space-y-3 text-xs sm:text-sm text-stone-700">
-              <li className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5" />
-                </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-blue-100 pb-4">
                 <div>
-                  <strong className="text-stone-900">1:1 맞춤 AI 계몽 멘토 24시간 무제한 상담</strong>
-                  <p className="text-[11px] text-stone-500 font-normal">번아웃, 커리어, 연애, 불안 등 4대 핵심 인지 왜곡 실시간 교정</p>
+                  <span className="text-xs font-bold text-blue-600 bg-blue-100/80 px-2.5 py-0.5 rounded-full">
+                    인기 플랜
+                  </span>
+                  <h3 className="text-xl font-extrabold text-stone-900 mt-1">베이직 멤버십</h3>
+                  <p className="text-xs text-stone-500">1:1 맞춤 계몽 코칭 & 카카오톡 데일리 케어</p>
                 </div>
-              </li>
 
-              <li className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <BellRing className="w-3.5 h-3.5" />
+                <div className="text-right">
+                  <div className="text-3xl font-extrabold text-blue-600 font-sans tracking-tight">
+                    6,500<span className="text-base font-bold text-stone-800">원</span>
+                  </div>
+                  <span className="text-xs font-medium text-stone-500"> / 월 (정기결제)</span>
                 </div>
-                <div>
-                  <strong className="text-stone-900">매일 아침 카카오톡 맞춤 계몽 알림톡</strong>
-                  <p className="text-[11px] text-stone-500 font-normal">전날 상담 기반 인지적 맹점을 찌르는 통찰 질문 & 1일 1미션 발송</p>
-                </div>
-              </li>
+              </div>
 
-              <li className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <BrainCircuit className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <strong className="text-stone-900">메타인지 성장 다이어리 클라우드 저장</strong>
-                  <p className="text-[11px] text-stone-500 font-normal">사실과 해석 분리 노트, 패러다임 시프트 기록 및 분석</p>
-                </div>
-              </li>
+              {/* Benefits */}
+              <div className="space-y-3">
+                <span className="text-xs font-bold text-stone-800 block">✨ 베이직 포함 혜택</span>
+                
+                <ul className="space-y-2.5 text-xs text-stone-700">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <span><strong>1:1 맞춤 AI 계몽 멘토</strong> 24시간 무제한 상담</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <span><strong>매일 아침 8시 카카오 알림톡</strong> 맞춤 발송</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <span>마이페이지 <strong>내면 상태 진단창</strong> 지원</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <span><strong>메타인지 성장 다이어리</strong> 클라우드 저장</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-              <li className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <HeartHandshake className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <strong className="text-stone-900">약정 없는 자유로운 구독 및 상시 해지</strong>
-                  <p className="text-[11px] text-stone-500 font-normal">위약금 없이 언제든 클릭 한 번으로 간편하게 해지 가능</p>
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          <div className="p-3 bg-stone-100/90 rounded-2xl border border-stone-200/80 text-[11px] text-stone-600 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-            <span>매월 6,500원이 정기 결제되며, 추가 숨은 비용은 없습니다.</span>
-          </div>
-
-          <button
-            onClick={onOpenPricing}
-            className={`w-full py-4 rounded-2xl font-bold text-sm sm:text-base shadow-lg transition-all flex items-center justify-center gap-2 ${
-              isSubscribed
-                ? 'bg-emerald-600 text-white cursor-default'
-                : 'bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white active:scale-98 shadow-blue-500/25'
-            }`}
-          >
-            {isSubscribed ? (
-              <>
-                <Check className="w-5 h-5" />
-                <span>현재 구독 중인 멤버십입니다</span>
-              </>
-            ) : (
-              <>
-                <span>월 6,500원으로 구독 시작하기</span>
+            <div className="pt-2">
+              <button
+                onClick={onOpenPricing}
+                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
+              >
+                <span>{plan === 'basic' ? '현재 이용 중인 플랜' : '월 6,500원 베이직 구독하기'}</span>
                 <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+              </button>
+            </div>
 
+          </div>
+
+          {/* 2. Premium Plan (월 12,900원) */}
+          <div className="bg-gradient-to-b from-amber-50/50 via-white to-orange-50/20 rounded-3xl p-6 sm:p-8 border-2 border-amber-500 shadow-xl relative flex flex-col justify-between space-y-6">
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-amber-100 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full flex items-center gap-1 w-max">
+                    <Crown className="w-3 h-3 text-amber-600" />
+                    <span>심층 멘토링</span>
+                  </span>
+                  <h3 className="text-xl font-extrabold text-stone-900 mt-1">프리미엄 멤버십</h3>
+                  <p className="text-xs text-stone-500">심층 인지 왜곡 딥다이브 & 주간 심리 리포트</p>
+                </div>
+
+                <div className="text-right">
+                  <div className="text-3xl font-extrabold text-stone-900 font-sans tracking-tight">
+                    12,900<span className="text-base font-bold text-stone-800">원</span>
+                  </div>
+                  <span className="text-xs font-medium text-stone-500"> / 월 (정기결제)</span>
+                </div>
+              </div>
+
+              {/* Benefits */}
+              <div className="space-y-3">
+                <span className="text-xs font-bold text-stone-800 block">👑 프리미엄 전용 혜택</span>
+                
+                <ul className="space-y-2.5 text-xs text-stone-700">
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span><strong>베이직의 모든 혜택</strong> 기본 포함</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span><strong>심층 꼬리질문 딥다이브</strong> 무제한 분석 세션</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span>주간 <strong>메타인지 심리 분석 리포트</strong> 발행</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <span>긴급 멘탈 회복 <strong>우선 응답 AI 채널</strong> 배정</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                onClick={onOpenPricing}
+                className="w-full py-3.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <span>{plan === 'premium' ? '현재 이용 중인 플랜' : '월 12,900원 프리미엄 구독하기'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Footer info */}
+        <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200/80 text-xs text-stone-600 max-w-xl mx-auto flex items-center justify-center gap-2 text-center">
+          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+          <span>모든 플랜은 약정 및 위약금 없이 마이페이지에서 원클릭으로 상시 해지할 수 있습니다.</span>
         </div>
 
       </div>

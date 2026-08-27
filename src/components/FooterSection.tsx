@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Mail, ShieldCheck } from 'lucide-react';
+import { Sparkles, Mail, ShieldCheck, Compass } from 'lucide-react';
 
 interface FooterSectionProps {
   onNavigate: (sectionId: string) => void;
@@ -17,12 +17,16 @@ export const FooterSection: React.FC<FooterSectionProps> = ({
       <div className="border-b border-stone-800/80 py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
-          {/* Quick Nav Links: 서비스소개 -> 구독하기 -> 상담설명 -> 카카오톡 대화 */}
+          {/* Quick Nav Links: 서비스소개 -> 구독하기 -> 상담설명 -> 카카오톡 대화 + 마이페이지 */}
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-stone-300 font-medium">
             <button onClick={() => onNavigate('intro')} className="hover:text-white transition-colors">1. 서비스 소개</button>
-            <button onClick={onOpenPricing} className="hover:text-white transition-colors">2. 구독하기 (월 6,500원)</button>
+            <button onClick={onOpenPricing} className="hover:text-white transition-colors">2. 구독하기 (정기결제)</button>
             <button onClick={() => onNavigate('consulting')} className="hover:text-white transition-colors">3. 상담 설명</button>
             <button onClick={() => onNavigate('kakao')} className="hover:text-white transition-colors">4. 카카오톡 대화</button>
+            <button onClick={() => onNavigate('mypage')} className="text-blue-400 hover:text-blue-300 font-bold transition-colors flex items-center gap-1">
+              <Compass className="w-3.5 h-3.5" />
+              <span>마이페이지 (내면 진단)</span>
+            </button>
           </div>
 
           <div className="text-[11px] text-stone-500 flex items-center gap-1.5">
