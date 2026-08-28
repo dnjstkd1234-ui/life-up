@@ -114,14 +114,15 @@ export const OracleRoom: React.FC = () => {
         const imgData = await toPng(pageElement, { 
           pixelRatio: 2,
           backgroundColor: '#1c1917',
-          width: pageElement.scrollWidth,
-          height: pageElement.scrollHeight,
           style: {
             transform: 'scale(1)',
-            transformOrigin: 'top left',
-            overflow: 'visible'
+            transformOrigin: 'top left'
           }
         });
+
+        if (imgData === 'data:,') {
+          throw new Error('리포트 화면을 캡처하는 데 실패했습니다. 내용이 너무 길어 브라우저 렌더링에 문제가 생겼을 수 있습니다.');
+        }
         
         if (i > 0) pdf.addPage();
         

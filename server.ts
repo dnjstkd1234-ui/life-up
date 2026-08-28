@@ -89,7 +89,6 @@ ${userStory}`;
       const result = await model.generateContentStream({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
-          responseMimeType: 'application/json',
           maxOutputTokens: 8192
         },
         safetySettings: [
