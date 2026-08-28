@@ -2,55 +2,41 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
 
-let aiClient: GoogleGenAI | null = null;
-function getAi(): GoogleGenAI {
+let aiClient: GoogleGenerativeAI | null = null;
+function getAi(): GoogleGenerativeAI {
   if (!aiClient) {
     const key = process.env.GEMINI_API_KEY;
     if (!key) {
       throw new Error('GEMINI_API_KEY environment variable is required.');
     }
-    aiClient = new GoogleGenAI({
-      apiKey: key,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build'
-        }
-      }
-    });
+    aiClient = new GoogleGenerativeAI(key);
   }
   return aiClient;
 }
 
-const AWAKENING_SYSTEM_PROMPT = `[Role]
-당신은 사용자의 닫힌 사고방식을 깨부수고 새로운 관점을 열어주는 '1:1 맞춤형 계몽(Awakening) AI 멘토, 라이프업'입니다.
-단순히 위로하거나 정답을 알려주는 챗봇이 아닙니다. 소크라테스식 문답법을 통해 사용자가 자신의 인지적 왜곡(번아웃, 취업, 연애, 불안)을 스스로 깨닫게 만드는 것이 당신의 유일한 목적입니다.
+const ORACLE_SYSTEM_PROMPT = `[Role & Persona]
+당신은 인생의 방향을 잃고 방황하는 자들에게 단 한 번의 강력한 통찰로 닫힌 시야를 깨워주는(Awakening) '운명 통찰가(Life Oracle)'입니다.
+사용자는 1회성 유료 결제를 마친 상태이며, 깊이 있고 압도적인 분량의 '운명 통찰 리포트(PDF)'를 기대하고 있습니다. 당신의 진단은 철학적/심리학적 통찰을 통해 사용자의 뼈를 때리고 인지적 왜곡을 파괴해야 합니다. 
+압도적이고 권위 있으며, 깊은 연민과 냉철함이 공존하는 '현자'의 말투(무게감 있는 정중한 존댓말)를 사용하십시오.
 
-[Context & User Data]
-당신은 매 세션이 시작될 때, 사용자가 입력한 [현재 감정(User_Emotion)], [고민 카테고리(User_Category)], [현재 상황(User_Situation)] 데이터를 전달받습니다. 이 데이터를 기반으로 가장 날카롭고 본질적인 첫 질문을 던지며 대화를 시작해야 합니다.
+[Core Rules]
+1. 위로나 공감은 배제하고, 내담자가 착각하고 있는 환상이나 방어 기제를 직설적으로 깨부수세요.
+2. 한 문장 한 문장이 문학적이고 철학적인 깊이를 가져야 하며, 비유와 은유를 적극 활용하세요.
+3. 반드시 A4 용지 5페이지 분량 수준으로 아주 깊이 있고 방대한 분석을 제공할 것.
+4. 각 섹션(통찰, 팩트체크, 액션플랜 등)마다 최소 1,000자 이상 구체적인 예시와 심리학적 근거를 들어 뼈를 때리게 작성할 것.
+5. 출력 형식: 리포트 PDF 생성을 위해 **반드시 아래의 JSON 포맷으로만 출력**하세요. 마크다운 코드 블록(\`\`\`json ... \`\`\`) 없이 순수 JSON 문자열만 반환하세요.
 
-[Core Rules : 계몽을 위한 5대 원칙]
-1. 정답 금지: 해결책을 제시하지 마세요. 대신, 사용자의 답변에 내포된 '전제'에 의문을 제기하는 질문을 던지세요.
-2. 사실과 해석의 분리: 사용자가 말하는 두려움이나 불안이 '실제 일어난 팩트'인지, '스스로 만들어낸 망상/해석'인지 철저히 분리하도록 유도하세요.
-3. 꼬리 질문(Deep Dive): 한 번의 질문으로 끝나지 않고, 사용자의 대답에서 모순이나 방어 기제를 발견하면 연속해서 깊이 파고드세요. (한 번에 최대 1개~2개의 질문만 던질 것)
-4. 단호하지만 통찰력 있는 톤앤매너: 감정적으로 동조("너무 힘드시겠어요")하는 것을 최소화하고, 이성적이고 통찰력 있는 태도로 본질을 짚어내세요.
-5. 4대 카테고리별 맞춤 타겟팅:
-   - [번아웃]: 완벽주의, 타인의 시선, '쉬면 도태된다'는 강박을 타격할 것.
-   - [취업]: 사회적 기준과 개인의 진짜 가치를 분리시킬 것.
-   - [연애]: 타인을 통한 결핍 충족(의존성)을 직면하게 할 것.
-   - [불안]: 통제 불가능한 미래와 통제 가능한 현재(지금 여기)를 구분시킬 것.
-
-[Interaction Flow (대화 시나리오)]
-- 첫 대화 시작 시: 유저의 현재 심정과 상황({User_Emotion}, {User_Category}, {User_Situation})을 간략히 요약한 뒤, 그 상황을 낯설게 보게 만드는 묵직한 '첫 번째 질문'을 던진다.
-- 진행 중 대화: 사용자의 말 속 전제와 인지 왜곡을 짚어내고 1~2개의 깊이 있는 꼬리 질문을 이어간다.
-- [Daily Nudge (자동화 메시지용 규칙)]: 사용자가 "오늘 상담 종료"를 요청하거나 상담 마무리를 요청하면, AI는 오늘 대화의 핵심을 찌르는 단 한 줄의 [계몽 문장]과 내일 생각해 볼 [숙제 질문]을 요약해서 출력합니다.
-  종료 시 출력 형식:
-  [내일의 계몽 알림톡]
-  문장: (오늘 대화를 관통하는 뼈 때리는 한 문장)
-  질문: (내일 하루 동안 스스로 고민해볼 질문)`;
+[Output JSON Format]
+{
+  "section1_insight": "내담자의 겉으로 드러난 감정 이면에 숨겨진 진짜 두려움과 결핍을 꿰뚫어보는 통찰. (반드시 1,000자 이상, 구체적 예시와 심리학적 근거 포함)",
+  "section2_fact_violence": "내담자가 스스로를 갉아먹고 있는 잘못된 믿음이나 핑계를 단호하게 짚어내고 인지적 왜곡을 파괴하는 구간. (반드시 1,000자 이상, 심리학적 개념 활용)",
+  "section3_action_plan": "허상을 깨달은 내담자가 당장 오늘부터 실천해야 할 구체적이고 현실적인 행동 지침 2~3가지. (각 지침마다 왜 그것을 해야 하는지 철학적/심리학적 이유를 포함하여 전체 1,000자 이상 작성할 것)",
+  "master_final_quote": "리포트 맨 마지막을 장식할 단 하나의 묵직하고 강렬한 명언격 문장 (50자 이내)"
+}`;
 
 async function startServer() {
   const app = express();
@@ -87,119 +73,76 @@ async function startServer() {
     }
   });
 
-  // 2. 1:1 Awakening Mentor Chat API
-  app.post('/api/chat/coaching', async (req, res) => {
+  // 2. 1:1 운명 통찰 리포트 API (One-time Premium Reading)
+  app.post('/api/oracle/reading', async (req, res) => {
     try {
-      const { 
-        messages = [], 
-        userEmotion = '',
-        userCategory = '번아웃',
-        userSituation = '',
-        category = 'burnout', 
-        userName = '내담자',
-        isEndingSession = false
-      } = req.body;
+      const { userStory = '' } = req.body;
       
       const ai = getAi();
+      const model = ai.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
-      const lastUserMessage = messages[messages.length - 1]?.content || '';
-      const isEnding = isEndingSession || lastUserMessage.includes('오늘 상담 종료') || lastUserMessage.includes('상담 종료');
+      const prompt = `${ORACLE_SYSTEM_PROMPT}
 
-      const conversationHistory = (messages || []).map((m: { role: string; content: string }) => 
-        `${m.role === 'user' ? userName : 'AI 계몽 멘토'}: ${m.content}`
-      ).join('\n');
+[현재 내담자의 날것의 고민/사연]
+${userStory}`;
 
-      const prompt = `${AWAKENING_SYSTEM_PROMPT}
-
-[현재 내담자 세션 데이터]
-- 내담자 성명: ${userName}님
-- 고민 카테고리(User_Category): ${userCategory || category}
-- 현재 감정(User_Emotion): ${userEmotion || '불안 및 복잡함'}
-- 현재 상황(User_Situation): ${userSituation || '고민을 마주하고 있는 상태'}
-- 상담 종료 요청 여부: ${isEnding ? '예 (오늘 상담 종료 요청됨)' : '아니오 (대화 진행 중)'}
-
-[대화 히스토리]
-${conversationHistory || '(첫 세션 시작)'}
-
-[응답 가이드라인]
-${isEnding ? `
-- 사용자가 "오늘 상담 종료"를 요청했습니다. 오늘 대화의 핵심을 찌르는 단 한 줄의 [계몽 문장]과 내일 하루 동안 스스로 고민해볼 [숙제 질문]을 작성하세요.
-- 출력 형식:
-[내일의 계몽 알림톡]
-문장: (오늘 대화를 관통하는 뼈 때리는 한 문장)
-질문: (내일 하루 동안 스스로 고민해볼 질문)
-` : `
-- 첫 응답이거나 대화 진행 시, 위 5대 원칙(정답 금지, 사실과 해석 분리, 꼬리 질문 1~2개, 단호하고 통찰력 있는 톤, 4대 카테고리별 맞춤 타겟팅)을 엄격히 준수하세요.
-- 첫 응답일 경우: 유저의 현재 심정과 상황을 간략히 짚은 뒤, 그 상황을 낯설게 보게 만드는 묵직한 '첫 번째 질문'을 던지세요.
-`}
-
-반드시 아래 JSON 포맷으로 응답하세요:
-{
-  "message": "AI 멘토의 응답 전문 (종료 시 [내일의 계몽 알림톡] 형식 포함)",
-  "identifiedDistortion": "발견된 인지 왜곡 명칭 (예: 흑백논리 / 타인 인정 의존 / 파국화 시나리오 / 당위적 사고)",
-  "factVsInterpretation": {
-    "fact": "객관적으로 일어난 실제 사실 1문장",
-    "interpretation": "머릿속이 만들어낸 과장된 해석/두려움 1문장"
-  },
-  "sharpQuestion": "메타인지를 깨우는 날카로운 계몽 질문 1~2개",
-  "dailyNudge": {
-    "sentence": "오늘 대화를 관통하는 뼈 때리는 계몽 문장",
-    "homeworkQuestion": "내일 하루 동안 스스로 고민해볼 숙제 질문"
-  },
-  "isSessionEnded": ${isEnding}
-}`;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.7-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
+      const result = await model.generateContentStream({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          maxOutputTokens: 8192
+        },
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HARASSMENT' as any,
+            threshold: 'BLOCK_NONE' as any,
+          },
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH' as any,
+            threshold: 'BLOCK_NONE' as any,
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as any,
+            threshold: 'BLOCK_NONE' as any,
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as any,
+            threshold: 'BLOCK_NONE' as any,
+          }
+        ]
       });
 
-      const responseText = response.text?.trim() || '{}';
-      let parsed;
-      try {
-        parsed = JSON.parse(responseText);
-      } catch (e) {
-        parsed = {
-          message: isEnding
-            ? `[내일의 계몽 알림톡]\n문장: 내가 통제할 수 없는 타인의 기준을 내려놓을 때 진정한 내 삶이 시작됩니다.\n질문: 내일 하루 동안, 남들의 시선이 아닌 온전한 나를 위한 단 하나의 선택은 무엇인가요?`
-            : `${userName}님, 현재 상황에서 느끼는 불안의 이면에 어떤 '전제'가 깔려 있는지 짚어볼 필요가 있습니다. 그 불안은 실제로 일어난 '사실'인가요, 아니면 머릿속이 쓴 '시나리오'인가요?`,
-          identifiedDistortion: '인지적 왜곡 및 당위적 사고',
-          factVsInterpretation: {
-            fact: '현재 상황에 직면해 있는 것',
-            interpretation: '내가 실패하거나 도태될 것이라는 공포'
-          },
-          sharpQuestion: '그 상황에서 당신이 100% 통제할 수 있는 행동은 무엇인가요?',
-          dailyNudge: {
-            sentence: '내가 통제할 수 없는 것을 내려놓을 때 진정한 자유가 시작됩니다.',
-            homeworkQuestion: '내일 하루 동안 남들의 시선에서 벗어나 온전히 나를 위한 선택은 무엇인가요?'
-          },
-          isSessionEnded: isEnding
-        };
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Transfer-Encoding', 'chunked');
+
+      for await (const chunk of result.stream) {
+        res.write(chunk.text());
       }
-
-      res.json(parsed);
+      res.end();
     } catch (err: any) {
-      console.error('Error in /api/chat/coaching:', err);
-      res.status(500).json({ 
-        error: err.message || 'Internal server error',
-        message: '잠시 생각을 가다듬는 중입니다. 당신의 내면 깊은 이야기를 언제든 들려주세요.',
-        identifiedDistortion: '자기 비판적 사고',
-        factVsInterpretation: {
-          fact: '상황을 마주하고 있는 것',
-          interpretation: '스스로를 과도하게 압박하는 생각'
-        },
-        sharpQuestion: '이 상황에서 내가 바꿀 수 있는 단 1%의 행동은 무엇인가요?',
-        dailyNudge: {
-          sentence: '자신을 객관적으로 바라보는 순간 왜곡된 두려움은 힘을 잃습니다.',
-          homeworkQuestion: '오늘의 걱정 중 내일 실제로 일어날 일은 몇 개인가요?'
-        },
-        isSessionEnded: false
-      });
+      console.error('Error in /api/oracle/reading:', err);
+      
+      if (res.headersSent) {
+        // If stream already started, we can't send JSON anymore, just end the stream
+        res.end();
+        return;
+      }
+      
+      if (err.status === 503 || (err.message && err.message.includes('503'))) {
+        return res.status(503).json({ error: '현재 AI 서버 접속자가 많아 분석이 지연되고 있습니다. 잠시 후 다시 버튼을 눌러주세요.' });
+      }
+      
+      if (err.status === 429 || (err.message && err.message.includes('429'))) {
+        return res.status(429).json({ error: '현재 API 사용량이 한도를 초과했습니다 (429 Too Many Requests). 잠시 후 다시 시도해주세요.' });
+      }
+      
+      if (err.message && err.message.includes('GEMINI_API_KEY')) {
+        return res.status(500).json({ error: 'AI Studio 설정(Settings) 메뉴에서 GEMINI_API_KEY를 먼저 등록해주세요.' });
+      }
+      res.status(500).json({ error: err.message || 'Failed to generate oracle reading report' });
     }
   });
+
 
   // 3. 3-Minute Initial Awakening & Metacognition Diagnosis API (온보딩 진단)
   app.post('/api/assessment/onboarding', async (req, res) => {
@@ -211,6 +154,7 @@ ${isEnding ? `
       } = req.body;
 
       const ai = getAi();
+      const model = ai.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
       const prompt = `사용자가 라이프업의 3분 초기 성향 및 결핍 진단을 완료했습니다.
 사용자 이름: ${userName}
@@ -240,15 +184,14 @@ ${isEnding ? `
   "recommendedMentorQuote": "진정한 성장은 남의 기준을 모방하는 것이 아니라 나만의 속도를 회복하는 데서 시작됩니다."
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.7-flash',
-        contents: prompt,
-        config: {
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
           responseMimeType: 'application/json'
         }
       });
 
-      const parsed = JSON.parse(response.text?.trim() || '{}');
+      const parsed = JSON.parse(result.response.text().trim() || '{}');
       res.json(parsed);
     } catch (err: any) {
       console.error('Error in /api/assessment/onboarding:', err);
@@ -279,6 +222,7 @@ ${isEnding ? `
 
     try {
       const ai = getAi();
+      const model = ai.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
       const prompt = `당신은 라이프업의 '데일리 맞춤 계몽 알림톡' 발송 시스템입니다.
 내담자: ${userName}님
@@ -301,15 +245,14 @@ ${isEnding ? `
   "actionUrl": "/diary?theme=${category}"
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.7-flash',
-        contents: prompt,
-        config: {
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
           responseMimeType: 'application/json'
         }
       });
 
-      const parsed = JSON.parse(response.text?.trim() || '{}');
+      const parsed = JSON.parse(result.response.text().trim() || '{}');
       res.json(parsed);
     } catch (err: any) {
       console.error('Error in /api/notifications/awakening-alert:', err);

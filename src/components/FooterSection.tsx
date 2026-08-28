@@ -20,7 +20,7 @@ export const FooterSection: React.FC<FooterSectionProps> = ({
           {/* Quick Nav Links: 서비스소개 -> 구독하기 -> 상담설명 -> 카카오톡 대화 + 마이페이지 */}
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-stone-300 font-medium">
             <button onClick={() => onNavigate('intro')} className="hover:text-white transition-colors">1. 서비스 소개</button>
-            <button onClick={onOpenPricing} className="hover:text-white transition-colors">2. 구독하기 (정기결제)</button>
+            <button onClick={onOpenPricing} className="hover:text-white transition-colors">2. 프리미엄 리딩 (결제)</button>
             <button onClick={() => onNavigate('consulting')} className="hover:text-white transition-colors">3. 상담 설명</button>
             <button onClick={() => onNavigate('kakao')} className="hover:text-white transition-colors">4. 카카오톡 대화</button>
             <button onClick={() => onNavigate('mypage')} className="text-blue-400 hover:text-blue-300 font-bold transition-colors flex items-center gap-1">

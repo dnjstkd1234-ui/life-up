@@ -32,7 +32,7 @@ export const KakaoCareSection: React.FC<KakaoCareSectionProps> = ({ onOpenPricin
                 onClick={onOpenPricing}
                 className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center gap-2"
               >
-                <span>월 6,500원으로 카카오 맞춤 대화 케어 받기</span>
+                <span>1,990원 1회 결제로 운명 통찰 리딩 받기</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

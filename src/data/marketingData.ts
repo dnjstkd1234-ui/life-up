@@ -11,21 +11,21 @@ export const HERO_SLIDES = [
     id: 1,
     tag: 'PREMIUM LIFE AWAKENING',
     title: '더 나은 삶으로 이어지는\n성장과 통찰의 공간,\n라이프업과 함께하세요',
-    subtitle: '혼자서만 끙끙 앓던 고민, 이제 끝내세요. 검증된 1:1 맞춤 AI 계몽 멘토와 매일 아침 카카오톡 맞춤 알림으로 당신의 인지적 맹점을 깨워드립니다.',
+    subtitle: '혼자서만 끙끙 앓던 고민, 이제 끝내세요. 검증된 1:1 맞춤 AI 계몽 멘토와 심층 진단 리포트로 당신의 인지적 맹점을 깨워드립니다.',
     bgImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1920&q=80',
-    primaryCta: '월 6,500원 구독 시작하기',
+    primaryCta: '1,990원 1회 리딩 시작하기',
     secondaryCta: '프로그램 자세히 보기',
-    highlightBadge: '월 6,500원 합리적인 정기 구독'
+    highlightBadge: '1,990원 단일 프리미엄 1회권'
   },
   {
     id: 2,
-    tag: 'DAILY AWAKENING CARE',
-    title: '매일 아침 8시,\n당신의 하루를 깨우는\n1:1 카카오톡 맞춤 알림',
-    subtitle: '인지 왜곡을 깨부수고 메타인지를 켭니다. 전날 상담을 기반으로 나만을 위한 날카로운 통찰 질문과 실천 미션을 카카오톡으로 받아보세요.',
+    tag: 'DEEP INSIGHT REPORT',
+    title: '단 한 번의 강력한 통찰로\n당신의 하루를 깨우는\n1:1 맞춤 진단 리포트',
+    subtitle: '인지 왜곡을 깨부수고 메타인지를 켭니다. 나만을 위한 날카로운 통찰 질문과 실천 미션을 담은 리포트를 받아보세요.',
     bgImage: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1920&q=80',
-    primaryCta: '카카오톡 맞춤케어 구독',
+    primaryCta: '운명 통찰 리포트 생성',
     secondaryCta: '성공 후기 확인하기',
-    highlightBadge: '월 6,500원 올인원 구독'
+    highlightBadge: '1,990원 운명 통찰 리포트'
   },
   {
     id: 3,
@@ -33,9 +33,9 @@ export const HERO_SLIDES = [
     title: '번아웃 극복부터 커리어 도약까지\n인생 2막을 여는\n마스터 솔루션',
     subtitle: '국내 최고 전문 멘토진과 설계한 체계적인 메타인지 프로그램으로 방황하던 일상에 확실한 이정표를 세워드립니다.',
     bgImage: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1920&q=80',
-    primaryCta: '1:1 심층 상담 예약',
-    secondaryCta: '구독 혜택 보기',
-    highlightBadge: '라이프업 멤버십 구독 진행 중'
+    primaryCta: '1:1 심층 진단 시작',
+    secondaryCta: '혜택 보기',
+    highlightBadge: '라이프업 심층 진단 진행 중'
   }
 ];
 
@@ -205,8 +205,8 @@ export const NEWS_AND_NOTICES: NewsNoticeItem[] = [
   {
     id: 'news-4',
     category: '공지사항',
-    title: '정기 구독 회원 대상 "웰컴 성장 진단 리포트" 발송 개시',
-    summary: '구독을 시작하신 모든 회원님들께 AI 정밀 멘탈 & 메타인지 분석 리포트를 맞춤형으로 제공합니다.',
+    title: '결제 회원 대상 "웰컴 성장 진단 리포트" 발송 개시',
+    summary: '리딩을 시작하신 모든 회원님들께 AI 정밀 멘탈 & 메타인지 분석 리포트를 맞춤형으로 제공합니다.',
     date: '2025.01.05',
     isNew: false
   }

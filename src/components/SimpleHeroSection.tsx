@@ -42,7 +42,7 @@ export const SimpleHeroSection: React.FC<SimpleHeroSectionProps> = ({
             onClick={onOpenPricing}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-base shadow-xl shadow-blue-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2"
           >
-            <span>월 6,500원으로 구독 시작하기</span>
+            <span>1회권 결제하고 리포트 받기</span>
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>
@@ -55,11 +55,11 @@ export const SimpleHeroSection: React.FC<SimpleHeroSectionProps> = ({
           </div>
           <div className="flex items-center sm:justify-center gap-2">
             <BellRing className="w-4 h-4 text-sky-400 shrink-0" />
-            <span>매일 아침 카카오톡 맞춤 알림</span>
+            <span>나만의 맞춤 통찰 리포트 제공</span>
           </div>
           <div className="flex items-center sm:justify-center gap-2">
             <ShieldCheck className="w-4 h-4 text-teal-400 shrink-0" />
-            <span>월 6,500원 단일 정기 구독</span>
+            <span>1,990원 단일 프리미엄 1회권</span>
           </div>
         </div>
 
