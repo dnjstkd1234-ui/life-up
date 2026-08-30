@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Sparkles, Flame, Quote, Download, RotateCcw } from 'lucide-react';
-import { toPng } from 'html-to-image';
-import jsPDF from 'jspdf';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 interface OracleReport {
   section1_insight: string;
@@ -13,6 +13,7 @@ interface OracleReport {
 export const OracleRoom: React.FC = () => {
   const [userStory, setUserStory] = useState('');
   const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [report, setReport] = useState<OracleReport | null>(null);
   const [error, setError] = useState('');
   const reportRef = useRef<HTMLDivElement>(null);
@@ -98,46 +99,50 @@ export const OracleRoom: React.FC = () => {
     }
   };
 
-  const handleDownloadPdf = async () => {
-    const pages = document.querySelectorAll('.pdf-page');
-    if (pages.length === 0) {
-      alert('리포트 영역을 찾을 수 없습니다.');
-      return;
-    }
-    
-    try {
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+  const handleDownloadPdf = () => {
+    // 1. 상태 전환으로 UI 스위칭
+    setIsExporting(true);
+
+    // 2. DOM이 완전히 렌더링되도록 1500ms 대기
+    setTimeout(() => {
+      const element = document.getElementById('pdf-export-container');
+      if (!element) {
+        setIsExporting(false);
+        return;
+      }
+
+      const opt = {
+        margin: 0, // 이미 CSS에서 padding을 줬으므로 여기선 0
+        filename: '운명_통찰_리포트.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 1122 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak: { mode: ['css', 'legacy'] } // 내용이 길면 자동으로 페이지를 나눔
+      };
       
-      for (let i = 0; i < pages.length; i++) {
-        const pageElement = pages[i] as HTMLElement;
-        const imgData = await toPng(pageElement, { 
-          pixelRatio: 2,
-          backgroundColor: '#1c1917',
-          style: {
-            transform: 'scale(1)',
-            transformOrigin: 'top left'
+      // html2canvas oklch crash workaround
+      const originalGetComputedStyle = window.getComputedStyle;
+      window.getComputedStyle = function(elt, pseudoElt) {
+        const style = originalGetComputedStyle(elt, pseudoElt);
+        return new Proxy(style, {
+          get(target, prop) {
+            const val = target[prop as keyof CSSStyleDeclaration];
+            if (typeof val === 'string' && (val.includes('oklch') || val.includes('oklab'))) {
+              return val.replace(/(oklch|oklab)\([^)]+\)/g, 'rgba(0, 0, 0, 0.1)');
+            }
+            if (typeof val === 'function') {
+              return (val as Function).bind(target);
+            }
+            return val;
           }
         });
+      };
 
-        if (imgData === 'data:,') {
-          throw new Error('리포트 화면을 캡처하는 데 실패했습니다. 내용이 너무 길어 브라우저 렌더링에 문제가 생겼을 수 있습니다.');
-        }
-        
-        if (i > 0) pdf.addPage();
-        
-        const imgProps = pdf.getImageProperties(imgData);
-        const ratio = imgProps.width / imgProps.height;
-        const pdfHeight = pdfWidth / ratio;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      }
-      
-      pdf.save('진단_리포트.pdf');
-    } catch (err) {
-      console.error('PDF 다운로드 실패:', err);
-      alert('PDF 생성 중 오류가 발생했습니다.');
-    }
+      html2pdf().set(opt).from(element).save().finally(() => {
+        window.getComputedStyle = originalGetComputedStyle;
+        setIsExporting(false); // 다시 원래 프리뷰 화면으로 복구
+      });
+    }, 1500);
   };
 
   const handleReset = () => {
@@ -146,8 +151,65 @@ export const OracleRoom: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const splitIntoParagraphs = (text: string) => {
+    if (!text) return [];
+    return text.split(/\n+/).filter(p => p.trim() !== '');
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-12 flex flex-col items-center">
+      <style>{`
+        #pdf-export-container * {
+          max-width: 100% !important; /* 부모 너비 초과 절대 금지 */
+          text-align: center !important; /* 텍스트 자체 중앙 정렬 */
+          word-break: keep-all !important; /* 단어 찢어짐 방지 */
+          overflow-wrap: break-word !important; /* 영역 끝에 닿으면 강제 줄바꿈 */
+          box-sizing: border-box !important;
+          line-height: 2.0 !important;
+          color: #ffffff !important;
+        }
+        #pdf-export-container, .pdf-page, .pdf-paragraph, h2, h3, h4, p, div {
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
+        }
+        #pdf-export-container {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important; /* 완벽한 가로 중앙 정렬 */
+          width: 1122px !important; /* A4 가로 픽셀 절대치 */
+          min-height: 794px !important; /* A4 세로 픽셀 절대치 */
+          height: auto !important;
+          box-sizing: border-box !important;
+          padding: 80px 120px !important; /* 좌우 120px의 거대한 철벽 여백 */
+          margin: 0 auto !important;
+          background-color: #1a1a1a !important;
+        }
+        .pdf-page h2, .pdf-page h3, .pdf-page h4 {
+          margin-top: 40px !important;
+          margin-bottom: 20px !important;
+          display: block !important;
+          position: relative !important;
+          z-index: 10 !important;
+        }
+        .pdf-page {
+          width: 297mm !important; /* A4 가로 */
+          height: auto !important;
+          box-sizing: border-box !important;
+          padding: 40px 50px !important;
+          background-color: #1a1a1a !important;
+          position: relative !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+        }
+        .pdf-paragraph, .pdf-page p {
+          position: relative !important;
+          margin-bottom: 15px !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          font-size: 16px !important;
+          z-index: 10 !important;
+        }
+      `}</style>
       {!isDiagnosing && !report && (
         <div className="w-full max-w-3xl space-y-8 animate-in fade-in zoom-in duration-700">
           <div className="text-center space-y-4">
@@ -210,86 +272,166 @@ export const OracleRoom: React.FC = () => {
       {report && !isDiagnosing && (
         <div className="w-full max-w-5xl mx-auto animate-in slide-in-from-bottom-8 fade-in duration-700 space-y-12">
           
-          <div 
-            id="report-container" 
-            ref={reportRef}
-            className="space-y-12 flex flex-col items-center w-full"
-          >
-            {/* Page 1: Cover & Intro */}
-            <div className="pdf-page w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl text-stone-200 relative overflow-visible flex flex-col justify-center h-auto min-h-[600px] break-inside-avoid">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-900/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          {/* VISIBLE UI FOR BROWSER PREVIEW */}
+          {!isExporting && (
+            <>
+              <div id="report-preview" className="w-full block space-y-12 relative z-10 bg-[#1a1a1a]">
+                {/* Page 1: Cover & Intro */}
+                <div className="w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl text-stone-200 relative overflow-hidden h-auto min-h-[600px] flex flex-col justify-center">
+                  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-900/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+                  
+                  <div className="text-center border-b border-stone-800 pb-12 mb-12 relative z-10">
+                    <h2 className="text-4xl sm:text-5xl font-extrabold font-serif text-stone-100 mb-6 tracking-tight">운명 통찰 리포트</h2>
+                    <p className="text-stone-500 text-lg sm:text-xl tracking-widest uppercase">Life Oracle Master Reading</p>
+                  </div>
+
+                  <div className="relative z-10 block text-center">
+                    <Quote className="w-16 h-16 text-amber-500/20 mx-auto mb-4" />
+                    <p className="text-2xl sm:text-3xl font-serif font-medium leading-loose text-stone-300">
+                      당신의 무의식을 관통하는<br />냉철하고 가차없는 팩트체크
+                    </p>
+                  </div>
+                </div>
+
+                {/* Section 1 */}
+                <div className="w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl text-stone-200 relative overflow-hidden h-auto flex flex-col justify-center">
+                  <h4 className="text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 mb-8 block">
+                    I. 통찰 (문제의 본질)
+                  </h4>
+                  <div className="pl-6 block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300">
+                    {splitIntoParagraphs(report.section1_insight).map((p, idx) => (
+                      <p key={idx}>{p}</p>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 2 */}
+                <div className="w-full bg-stone-950 p-12 sm:p-16 rounded-3xl border border-red-900/40 shadow-inner relative overflow-hidden h-auto text-stone-200 flex flex-col justify-center">
+                  <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-900/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+                  <h4 className="text-3xl font-extrabold font-serif text-red-500 mb-12 block">
+                    <Flame className="w-10 h-10 inline-block mr-4 align-middle" />
+                    <span className="align-middle">II. 인지 왜곡 팩트체크 (냉정한 분석)</span>
+                  </h4>
+                  <div className="font-medium block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300 relative z-10">
+                    {splitIntoParagraphs(report.section2_fact_violence).map((p, idx) => (
+                      <p key={idx}>{p}</p>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Section 3 */}
+                <div className="w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl text-stone-200 relative overflow-hidden h-auto flex flex-col justify-center">
+                  <h4 className="text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 mb-8 block">
+                    III. 액션 플랜 (행동 지침)
+                  </h4>
+                  <div className="pl-6 block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300">
+                    {splitIntoParagraphs(report.section3_action_plan).map((p, idx) => (
+                      <p key={idx}>{p}</p>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quote */}
+                <div className="w-full p-12 sm:p-24 bg-black/60 text-stone-100 rounded-3xl border border-stone-800 relative h-auto overflow-hidden flex flex-col items-center justify-center text-center min-h-[400px]">
+                  <Quote className="w-32 h-32 absolute -top-8 -left-8 text-stone-800/40 -rotate-12 pointer-events-none" />
+                  <div className="text-3xl sm:text-5xl font-serif font-extrabold leading-[1.8] italic text-stone-100 relative z-10 space-y-6">
+                    {splitIntoParagraphs(report.master_final_quote).map((p, idx) => (
+                      <p key={idx}>{p}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
               
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-8 border-t border-stone-800">
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={isExporting}
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 disabled:opacity-50 text-white font-extrabold text-sm sm:text-base shadow-[0_0_15px_rgba(217,119,6,0.3)] transition-all flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{isExporting ? "생성 중..." : "진단 리포트 PDF로 평생 소장하기"}</span>
+                </button>
+                
+                <button
+                  onClick={handleReset}
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-sm sm:text-base transition-colors flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>상담 종료하기</span>
+                </button>
+              </div>
+            </>
+          )}
+          
+          {/* HIDDEN PDF EXPORT UI (Manual Pagination) */}
+          {isExporting && (
+            <div id="pdf-export-container">
+              {/* Page 1: Cover & Intro */}
+              <div className="pdf-page">
               <div className="text-center border-b border-stone-800 pb-12 mb-12 relative z-10">
                 <h2 className="text-4xl sm:text-5xl font-extrabold font-serif text-stone-100 mb-6 tracking-tight">운명 통찰 리포트</h2>
                 <p className="text-stone-500 text-lg sm:text-xl tracking-widest uppercase">Life Oracle Master Reading</p>
               </div>
 
-              <div className="relative z-10 flex flex-col items-center justify-center space-y-8 text-center flex-grow">
-                <Quote className="w-16 h-16 text-amber-500/20 mb-4" />
+              <div className="relative z-10 block text-center">
                 <p className="text-2xl sm:text-3xl font-serif font-medium leading-loose text-stone-300">
                   당신의 무의식을 관통하는<br />냉철하고 가차없는 팩트체크
                 </p>
               </div>
             </div>
 
-            {/* Page 2: Section 1 */}
-            <div className="pdf-page w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl space-y-12 text-stone-200 relative overflow-visible break-inside-avoid h-auto min-h-[600px] flex flex-col">
-              <h4 className="text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 shrink-0">
-                I. 통찰 (문제의 본질)
-              </h4>
-              <div className="text-lg sm:text-xl leading-[2.2] text-stone-300 whitespace-pre-wrap pl-6 flex-grow">
-                {report.section1_insight}
+            {/* Section 1 */}
+            {splitIntoParagraphs(report.section1_insight).map((p, idx) => (
+              <div key={`s1-${idx}`} className="pdf-page">
+                {idx === 0 && (
+                  <h4 className="text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 mb-8 block">
+                    I. 통찰 (문제의 본질)
+                  </h4>
+                )}
+                <div className="pdf-paragraph pl-6 block">
+                  {p}
+                </div>
               </div>
-            </div>
+            ))}
 
-            {/* Page 3: Section 2 */}
-            <div className="pdf-page w-full bg-stone-950 p-12 sm:p-16 rounded-3xl border border-red-900/40 shadow-inner relative z-10 break-inside-avoid h-auto min-h-[600px] overflow-visible flex flex-col">
-              <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-900/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
-              <h4 className="text-3xl font-extrabold font-serif text-red-500 flex items-center gap-4 shrink-0 mb-12">
-                <Flame className="w-10 h-10" />
-                <span>II. 인지 왜곡 팩트체크 (냉정한 분석)</span>
-              </h4>
-              <div className="text-lg sm:text-xl leading-[2.2] text-stone-300 whitespace-pre-wrap font-medium flex-grow">
-                {report.section2_fact_violence}
+            {/* Section 2 */}
+            {splitIntoParagraphs(report.section2_fact_violence).map((p, idx) => (
+              <div key={`s2-${idx}`} className="pdf-page bg-stone-950 border-red-900/40">
+                {idx === 0 && (
+                  <h4 className="text-3xl font-extrabold font-serif text-red-500 mb-12 block">
+                    II. 인지 왜곡 팩트체크 (냉정한 분석)
+                  </h4>
+                )}
+                <div className="pdf-paragraph font-medium block">
+                  {p}
+                </div>
               </div>
-            </div>
+            ))}
 
-            {/* Page 4: Section 3 */}
-            <div className="pdf-page w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl space-y-12 text-stone-200 relative overflow-visible break-inside-avoid h-auto min-h-[600px] flex flex-col">
-              <h4 className="text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 shrink-0">
-                III. 액션 플랜 (행동 지침)
-              </h4>
-              <div className="text-lg sm:text-xl leading-[2.2] text-stone-300 whitespace-pre-wrap pl-6 flex-grow">
-                {report.section3_action_plan}
+            {/* Section 3 */}
+            {splitIntoParagraphs(report.section3_action_plan).map((p, idx) => (
+              <div key={`s3-${idx}`} className="pdf-page">
+                {idx === 0 && (
+                  <h4 className="text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 mb-8 block">
+                    III. 액션 플랜 (행동 지침)
+                  </h4>
+                )}
+                <div className="pdf-paragraph pl-6 block">
+                  {p}
+                </div>
               </div>
-            </div>
+            ))}
 
-            {/* Page 5: Master Quote */}
-            <div className="pdf-page w-full p-12 sm:p-24 bg-black/60 text-stone-100 rounded-3xl text-center border border-stone-800 relative z-10 flex flex-col items-center justify-center break-inside-avoid h-auto min-h-[600px] overflow-visible">
-              <Quote className="w-32 h-32 absolute -top-8 -left-8 text-stone-800/40 -rotate-12 pointer-events-none" />
-              <p className="text-3xl sm:text-5xl font-serif font-extrabold leading-[1.8] italic max-w-4xl text-stone-100 relative z-10">
-                "{report.master_final_quote}"
-              </p>
+            {/* Master Quote */}
+            {splitIntoParagraphs(report.master_final_quote).map((p, idx) => (
+              <div key={`quote-${idx}`} className="pdf-page text-center">
+                <div className="pdf-paragraph text-3xl sm:text-5xl font-serif font-extrabold leading-[1.8] italic text-stone-100 relative z-10 block">
+                  {p}
+                </div>
+              </div>
+            ))}
             </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-8 border-t border-stone-800">
-            <button
-              onClick={handleDownloadPdf}
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-extrabold text-sm sm:text-base shadow-[0_0_15px_rgba(217,119,6,0.3)] transition-all flex items-center justify-center gap-2"
-            >
-              <Download className="w-5 h-5" />
-              <span>진단 리포트 PDF로 평생 소장하기</span>
-            </button>
-            
-            <button
-              onClick={handleReset}
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-sm sm:text-base transition-colors flex items-center justify-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>상담 종료하기</span>
-            </button>
-          </div>
+          )}
         </div>
       )}
     </div>
