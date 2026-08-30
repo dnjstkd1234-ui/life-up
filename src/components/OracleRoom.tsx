@@ -29,7 +29,7 @@ export const OracleRoom: React.FC = () => {
 
     try {
       const [res] = await Promise.all([
-        fetch('/api/oracle/reading', {
+        fetch('/.netlify/functions/generateReport', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userStory }),

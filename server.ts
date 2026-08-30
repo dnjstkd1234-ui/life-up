@@ -73,75 +73,34 @@ async function startServer() {
     }
   });
 
-  // 2. 1:1 운명 통찰 리포트 API (One-time Premium Reading)
-  app.post('/api/oracle/reading', async (req, res) => {
+  // 2. 1:1 운명 통찰 리포트 API (AI Studio 미리보기를 위한 Express Proxy)
+  app.post("/.netlify/functions/generateReport", async (req, res) => {
     try {
-      const { userStory = '' } = req.body;
-      
+      const { userStory = "" } = req.body;
       const ai = getAi();
-      const model = ai.getGenerativeModel({ model: 'gemini-3.6-flash' });
-
-      const prompt = `${ORACLE_SYSTEM_PROMPT}
-
-[현재 내담자의 날것의 고민/사연]
-${userStory}`;
-
+      const model = ai.getGenerativeModel({ model: "gemini-3.6-flash" });
+      const prompt = `${ORACLE_SYSTEM_PROMPT}\n\n[현재 내담자의 날것의 고민/사연]\n${userStory}`;
       const result = await model.generateContentStream({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: 8192
-        },
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 8192 },
         safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT' as any,
-            threshold: 'BLOCK_NONE' as any,
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH' as any,
-            threshold: 'BLOCK_NONE' as any,
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as any,
-            threshold: 'BLOCK_NONE' as any,
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as any,
-            threshold: 'BLOCK_NONE' as any,
-          }
+          { category: "HARM_CATEGORY_HARASSMENT" as any, threshold: "BLOCK_NONE" as any },
+          { category: "HARM_CATEGORY_HATE_SPEECH" as any, threshold: "BLOCK_NONE" as any },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT" as any, threshold: "BLOCK_NONE" as any },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT" as any, threshold: "BLOCK_NONE" as any }
         ]
       });
-
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('Transfer-Encoding', 'chunked');
-
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader("Transfer-Encoding", "chunked");
       for await (const chunk of result.stream) {
         res.write(chunk.text());
       }
       res.end();
     } catch (err: any) {
-      console.error('Error in /api/oracle/reading:', err);
-      
-      if (res.headersSent) {
-        // If stream already started, we can't send JSON anymore, just end the stream
-        res.end();
-        return;
-      }
-      
-      if (err.status === 503 || (err.message && err.message.includes('503'))) {
-        return res.status(503).json({ error: '현재 AI 서버 접속자가 많아 분석이 지연되고 있습니다. 잠시 후 다시 버튼을 눌러주세요.' });
-      }
-      
-      if (err.status === 429 || (err.message && err.message.includes('429'))) {
-        return res.status(429).json({ error: '현재 API 사용량이 한도를 초과했습니다 (429 Too Many Requests). 잠시 후 다시 시도해주세요.' });
-      }
-      
-      if (err.message && err.message.includes('GEMINI_API_KEY')) {
-        return res.status(500).json({ error: 'AI Studio 설정(Settings) 메뉴에서 GEMINI_API_KEY를 먼저 등록해주세요.' });
-      }
-      res.status(500).json({ error: err.message || 'Failed to generate oracle reading report' });
+      console.error("Error in netlify fallback:", err);
+      res.status(500).json({ error: err.message });
     }
   });
-
 
   // 3. 3-Minute Initial Awakening & Metacognition Diagnosis API (온보딩 진단)
   app.post('/api/assessment/onboarding', async (req, res) => {
