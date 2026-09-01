@@ -35,7 +35,7 @@ export default async (req: Request) => {
   try {
     const { userStory = '' } = await req.json();
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || (globalThis as any).Netlify?.env?.get('GEMINI_API_KEY') || (globalThis as any).Deno?.env?.get('GEMINI_API_KEY');
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'AI Studio 설정(Settings) 메뉴에서 GEMINI_API_KEY를 먼저 등록해주세요.' }), {
         status: 500,
