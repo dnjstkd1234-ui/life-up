@@ -21,6 +21,7 @@ export const OracleRoom: React.FC = () => {
 
   const handleStartDiagnosis = async () => {
     if (!userStory.trim()) return;
+
     setIsDiagnosing(true);
     setError('');
     setReport(null);
@@ -96,6 +97,7 @@ export const OracleRoom: React.FC = () => {
           master_final_quote: extractString(rawJson, 'master_final_quote')
         });
       }
+
     } catch (err: any) {
       setError(err.message || '알 수 없는 오류가 발생했습니다.');
       setIsDiagnosing(false);
