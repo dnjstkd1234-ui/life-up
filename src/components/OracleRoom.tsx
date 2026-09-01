@@ -228,11 +228,11 @@ export const OracleRoom: React.FC = () => {
       {!isDiagnosing && !report && (
         <div className="w-full max-w-3xl space-y-8 animate-in fade-in zoom-in duration-700">
           <div className="text-center space-y-4">
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-serif text-stone-100 tracking-tight">
-              무엇이 당신을 옭아매고 있습니까?
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-serif text-stone-100 tracking-tight whitespace-nowrap sm:whitespace-normal">
+              지금 당신이 직면한 가장 뼈아픈 문제는 무엇입니까?
             </h2>
             <p className="text-stone-400 text-sm sm:text-base">
-              꾸미거나 포장하지 마십시오. 당신의 뼈아픈 현실과 두려움을 날것 그대로 적어내십시오.
+              자신을 속이지 마십시오. 가장 내밀한 고민부터 현재의 문제점까지, 숨김없이 최대한 구체적으로 작성해야 완벽한 해체가 가능합니다.
             </p>
           </div>
 
@@ -243,7 +243,7 @@ export const OracleRoom: React.FC = () => {
                 rows={8}
                 value={userStory}
                 onChange={(e) => setUserStory(e.target.value)}
-                placeholder="당신을 괴롭히는 근본적인 불안이나 고민을 날것 그대로 적어주세요."
+                placeholder="당신을 괴롭히는 근본적인 불안이나 고민을 날것 그대로 적어주세요. (최대한 자세히 적어주세요.)"
                 className="w-full p-6 rounded-2xl bg-stone-900 border border-stone-800 text-stone-200 text-sm sm:text-base leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all resize-none placeholder:text-stone-600 shadow-xl"
               />
             </div>
