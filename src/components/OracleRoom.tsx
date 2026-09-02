@@ -122,7 +122,7 @@ export const OracleRoom: React.FC = () => {
         image: { type: 'jpeg' as const, quality: 1 },
         html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, windowWidth: 1122 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' as const },
-        pagebreak: { mode: ['css', 'legacy'] } // 내용이 길면 자동으로 페이지를 나눔
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', '.pdf-page', '.pdf-paragraph', '.break-inside-avoid'] } // 내용이 길면 자동으로 페이지를 나눔
       };
       
       // html2canvas oklch crash workaround
@@ -183,14 +183,22 @@ export const OracleRoom: React.FC = () => {
           line-height: 2.0 !important;
           color: #ffffff !important;
         }
-        #pdf-export-container, .pdf-page, .pdf-paragraph, h2, h3, h4, p, div {
+        .pdf-page, .pdf-paragraph, h1, h2, h3, h4, h5, h6, p, ul, ol, li {
           break-inside: avoid !important;
           page-break-inside: avoid !important;
         }
+        .break-before-page {
+          break-before: page !important;
+          page-break-before: always !important;
+        }
+        .break-after-page {
+          break-after: page !important;
+          page-break-after: always !important;
+        }
         #pdf-export-container {
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important; /* 완벽한 가로 중앙 정렬 */
+          display: block !important;
+          
+          /* align-items: center !important; */ /* 완벽한 가로 중앙 정렬 */
           width: 1122px !important; /* A4 가로 픽셀 절대치 */
           min-height: 794px !important; /* A4 세로 픽셀 절대치 */
           height: auto !important;
@@ -206,15 +214,23 @@ export const OracleRoom: React.FC = () => {
           position: relative !important;
           z-index: 10 !important;
         }
+        .pdf-cover {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          align-items: center !important;
+          min-height: 210mm !important;
+        }
         .pdf-page {
           width: 297mm !important; /* A4 가로 */
           height: auto !important;
           box-sizing: border-box !important;
           padding: 40px 50px !important;
+          margin: 0 auto !important;
           background-color: #1a1a1a !important;
           position: relative !important;
-          display: flex !important;
-          flex-direction: column !important;
+          display: block !important;
+          
           justify-content: center !important;
         }
         .pdf-paragraph, .pdf-page p {
@@ -310,12 +326,12 @@ export const OracleRoom: React.FC = () => {
 
                 {/* Section 1 */}
                 <div className="w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl text-stone-200 relative overflow-hidden h-auto flex flex-col justify-center">
-                  <h4 className="text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 mb-8 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 mb-8 block">
                     I. 통찰 (문제의 본질)
                   </h4>
                   <div className="pl-6 block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300">
                     {splitIntoParagraphs(report.section1_insight).map((p, idx) => (
-                      <p key={idx}>{renderBold(p)}</p>
+                      <p key={idx} className="break-inside-avoid">{renderBold(p)}</p>
                     ))}
                   </div>
                 </div>
@@ -323,25 +339,25 @@ export const OracleRoom: React.FC = () => {
                 {/* Section 2 */}
                 <div className="w-full bg-stone-950 p-12 sm:p-16 rounded-3xl border border-red-900/40 shadow-inner relative overflow-hidden h-auto text-stone-200 flex flex-col justify-center">
                   <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-900/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
-                  <h4 className="text-3xl font-extrabold font-serif text-red-500 mb-12 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-red-500 mb-12 block">
                     <Flame className="w-10 h-10 inline-block mr-4 align-middle" />
                     <span className="align-middle">II. 인지 왜곡 팩트체크 (냉정한 분석)</span>
                   </h4>
                   <div className="font-medium block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300 relative z-10">
                     {splitIntoParagraphs(report.section2_fact_violence).map((p, idx) => (
-                      <p key={idx}>{renderBold(p)}</p>
+                      <p key={idx} className="break-inside-avoid">{renderBold(p)}</p>
                     ))}
                   </div>
                 </div>
 
                 {/* Section 3 */}
                 <div className="w-full bg-stone-900 border border-stone-800 rounded-3xl p-12 sm:p-16 shadow-2xl text-stone-200 relative overflow-hidden h-auto flex flex-col justify-center">
-                  <h4 className="text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 mb-8 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 mb-8 block">
                     III. 액션 플랜 (행동 지침)
                   </h4>
                   <div className="pl-6 block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300">
                     {splitIntoParagraphs(report.section3_action_plan).map((p, idx) => (
-                      <p key={idx}>{renderBold(p)}</p>
+                      <p key={idx} className="break-inside-avoid">{renderBold(p)}</p>
                     ))}
                   </div>
                 </div>
@@ -349,12 +365,12 @@ export const OracleRoom: React.FC = () => {
                 {/* Section 4 */}
                 <div className="w-full bg-stone-950 border border-indigo-900/40 rounded-3xl p-12 sm:p-16 shadow-inner text-stone-200 relative overflow-hidden h-auto flex flex-col justify-center">
                   <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-900/10 rounded-full blur-[100px] -translate-y-1/3 translate-x-1/3 pointer-events-none" />
-                  <h4 className="text-3xl font-extrabold font-serif text-indigo-400 border-l-4 border-indigo-400 pl-6 mb-8 block relative z-10">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-indigo-400 border-l-4 border-indigo-400 pl-6 mb-8 block relative z-10">
                     IV. 운명의 심판 (미래 예언 🔮)
                   </h4>
                   <div className="pl-6 block space-y-6 text-lg sm:text-xl leading-[2.2] text-stone-300 relative z-10">
                     {splitIntoParagraphs(report.section4_future_prophecy).map((p, idx) => (
-                      <p key={idx}>{renderBold(p)}</p>
+                      <p key={idx} className="break-inside-avoid">{renderBold(p)}</p>
                     ))}
                   </div>
                 </div>
@@ -364,7 +380,7 @@ export const OracleRoom: React.FC = () => {
                   <Quote className="w-32 h-32 absolute -top-8 -left-8 text-stone-800/40 -rotate-12 pointer-events-none" />
                   <div className="text-3xl sm:text-5xl font-serif font-extrabold leading-[1.8] italic text-stone-100 relative z-10 space-y-6">
                     {splitIntoParagraphs(report.master_final_quote).map((p, idx) => (
-                      <p key={idx}>{renderBold(p)}</p>
+                      <p key={idx} className="break-inside-avoid">{renderBold(p)}</p>
                     ))}
                   </div>
                 </div>
@@ -395,7 +411,7 @@ export const OracleRoom: React.FC = () => {
           {isExporting && (
             <div id="pdf-export-container">
               {/* Page 1: Cover & Intro */}
-              <div className="pdf-page">
+              <div className="pdf-page pdf-cover break-inside-avoid break-after-page">
               <div className="text-center border-b border-stone-800 pb-12 mb-12 relative z-10">
                 <h2 className="text-4xl sm:text-5xl font-extrabold font-serif text-stone-100 mb-6 tracking-tight">운명 통찰 리포트</h2>
                 <p className="text-stone-500 text-lg sm:text-xl tracking-widest uppercase">Life Oracle Master Reading</p>
@@ -410,13 +426,13 @@ export const OracleRoom: React.FC = () => {
 
             {/* Section 1 */}
             {splitIntoParagraphs(report.section1_insight).map((p, idx) => (
-              <div key={`s1-${idx}`} className="pdf-page">
+              <div key={`s1-${idx}`} className="pdf-page break-inside-avoid">
                 {idx === 0 && (
-                  <h4 className="text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 mb-8 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-amber-500 border-l-4 border-amber-500 pl-6 mb-8 block">
                     I. 통찰 (문제의 본질)
                   </h4>
                 )}
-                <div className="pdf-paragraph pl-6 block">
+                <div className="pdf-paragraph break-inside-avoid pl-6 block">
                   {renderBold(p)}
                 </div>
               </div>
@@ -424,13 +440,13 @@ export const OracleRoom: React.FC = () => {
 
             {/* Section 2 */}
             {splitIntoParagraphs(report.section2_fact_violence).map((p, idx) => (
-              <div key={`s2-${idx}`} className="pdf-page bg-stone-950 border-red-900/40">
+              <div key={`s2-${idx}`} className={`pdf-page break-inside-avoid bg-stone-950 border-red-900/40 ${idx === 0 ? 'break-before-page' : ''}`}>
                 {idx === 0 && (
-                  <h4 className="text-3xl font-extrabold font-serif text-red-500 mb-12 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-red-500 mb-12 block">
                     II. 인지 왜곡 팩트체크 (냉정한 분석)
                   </h4>
                 )}
-                <div className="pdf-paragraph font-medium block">
+                <div className="pdf-paragraph break-inside-avoid font-medium block">
                   {renderBold(p)}
                 </div>
               </div>
@@ -438,13 +454,13 @@ export const OracleRoom: React.FC = () => {
 
             {/* Section 3 */}
             {splitIntoParagraphs(report.section3_action_plan).map((p, idx) => (
-              <div key={`s3-${idx}`} className="pdf-page">
+              <div key={`s3-${idx}`} className={`pdf-page break-inside-avoid ${idx === 0 ? 'break-before-page' : ''}`}>
                 {idx === 0 && (
-                  <h4 className="text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 mb-8 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-blue-400 border-l-4 border-blue-400 pl-6 mb-8 block">
                     III. 액션 플랜 (행동 지침)
                   </h4>
                 )}
-                <div className="pdf-paragraph pl-6 block">
+                <div className="pdf-paragraph break-inside-avoid pl-6 block">
                   {renderBold(p)}
                 </div>
               </div>
@@ -452,13 +468,13 @@ export const OracleRoom: React.FC = () => {
 
             {/* Section 4 */}
             {splitIntoParagraphs(report.section4_future_prophecy).map((p, idx) => (
-              <div key={`s4-${idx}`} className="pdf-page bg-stone-950 border-indigo-900/40">
+              <div key={`s4-${idx}`} className={`pdf-page break-inside-avoid bg-stone-950 border-indigo-900/40 ${idx === 0 ? 'break-before-page' : ''}`}>
                 {idx === 0 && (
-                  <h4 className="text-3xl font-extrabold font-serif text-indigo-400 border-l-4 border-indigo-400 pl-6 mb-8 block">
+                  <h4 className="break-inside-avoid text-3xl font-extrabold font-serif text-indigo-400 border-l-4 border-indigo-400 pl-6 mb-8 block">
                     IV. 운명의 심판 (미래 예언 🔮)
                   </h4>
                 )}
-                <div className="pdf-paragraph pl-6 block">
+                <div className="pdf-paragraph break-inside-avoid pl-6 block">
                   {renderBold(p)}
                 </div>
               </div>
@@ -466,8 +482,8 @@ export const OracleRoom: React.FC = () => {
 
             {/* Master Quote */}
             {splitIntoParagraphs(report.master_final_quote).map((p, idx) => (
-              <div key={`quote-${idx}`} className="pdf-page text-center">
-                <div className="pdf-paragraph text-3xl sm:text-5xl font-serif font-extrabold leading-[1.8] italic text-stone-100 relative z-10 block">
+              <div key={`quote-${idx}`} className={`pdf-page break-inside-avoid text-center ${idx === 0 ? 'break-before-page' : ''}`}>
+                <div className="pdf-paragraph break-inside-avoid text-3xl sm:text-5xl font-serif font-extrabold leading-[1.8] italic text-stone-100 relative z-10 block">
                   {renderBold(p)}
                 </div>
               </div>
