@@ -183,7 +183,7 @@ export const OracleRoom: React.FC = () => {
           line-height: 2.0 !important;
           color: #ffffff !important;
         }
-        .pdf-page, .pdf-paragraph, h1, h2, h3, h4, h5, h6, p, ul, ol, li {
+        .pdf-page, .pdf-paragraph, h1, h2, h3, h4, h5, h6, p, ul, ol, li, #pdf-export-container div {
           break-inside: avoid !important;
           page-break-inside: avoid !important;
         }
@@ -209,7 +209,9 @@ export const OracleRoom: React.FC = () => {
         }
         .pdf-page h2, .pdf-page h3, .pdf-page h4 {
           margin-top: 40px !important;
-          margin-bottom: 20px !important;
+          margin-bottom: 30px !important;
+          padding-top: 10px !important;
+          padding-bottom: 10px !important;
           display: block !important;
           position: relative !important;
           z-index: 10 !important;
@@ -233,9 +235,12 @@ export const OracleRoom: React.FC = () => {
           
           justify-content: center !important;
         }
-        .pdf-paragraph, .pdf-page p {
+        .pdf-paragraph, .pdf-page p, .pdf-page li, .pdf-page ul, .pdf-page ol {
           position: relative !important;
-          margin-bottom: 15px !important;
+          margin-top: 15px !important;
+          margin-bottom: 25px !important;
+          padding-top: 10px !important;
+          padding-bottom: 10px !important;
           color: rgba(255, 255, 255, 0.9) !important;
           font-size: 16px !important;
           z-index: 10 !important;

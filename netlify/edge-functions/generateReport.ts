@@ -54,30 +54,53 @@ export default async (req: Request) => {
 
     const prompt = `${ORACLE_SYSTEM_PROMPT}\n\n[현재 내담자의 날것의 고민/사연]\n${userStory}`;
 
-    const result = await model.generateContentStream({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        maxOutputTokens: 8192
-      },
-      safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT' as any,
-          threshold: 'BLOCK_NONE' as any,
-        },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH' as any,
-          threshold: 'BLOCK_NONE' as any,
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as any,
-          threshold: 'BLOCK_NONE' as any,
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as any,
-          threshold: 'BLOCK_NONE' as any,
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const MAX_RETRIES = 3;
+    let result;
+    let lastError;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        result = await model.generateContentStream({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: 8192
+          },
+          safetySettings: [
+            {
+              category: 'HARM_CATEGORY_HARASSMENT' as any,
+              threshold: 'BLOCK_NONE' as any,
+            },
+            {
+              category: 'HARM_CATEGORY_HATE_SPEECH' as any,
+              threshold: 'BLOCK_NONE' as any,
+            },
+            {
+              category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as any,
+              threshold: 'BLOCK_NONE' as any,
+            },
+            {
+              category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as any,
+              threshold: 'BLOCK_NONE' as any,
+            }
+          ]
+        });
+        
+        // 호출 성공 시 반복문 탈출
+        break;
+      } catch (err: any) {
+        console.error(`API Attempt ${attempt} failed:`, err.message || err);
+        lastError = err;
+        if (attempt < MAX_RETRIES) {
+          // 재시도 간 약간의 딜레이 (1초, 2초)
+          await delay(attempt * 1000);
         }
-      ]
-    });
+      }
+    }
+
+    if (!result) {
+      throw lastError || new Error("Failed to generate content after retries");
+    }
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -115,7 +138,7 @@ export default async (req: Request) => {
       return new Response(JSON.stringify({ error: 'AI Studio 설정(Settings) 메뉴에서 GEMINI_API_KEY를 먼저 등록해주세요.' }), { status: 500, headers: { 'Content-Type': 'application/json' }});
     }
 
-    return new Response(JSON.stringify({ error: err.message || 'Failed to generate oracle reading report' }), {
+    return new Response(JSON.stringify({ error: 'AI 서버가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
