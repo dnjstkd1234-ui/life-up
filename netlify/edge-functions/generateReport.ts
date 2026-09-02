@@ -84,7 +84,7 @@ export default async (req: Request) => {
               threshold: 'BLOCK_NONE' as any,
             }
           ]
-        });
+        }, { timeout: 120000 }); // Increase timeout to 120 seconds
         
         // 호출 성공 시 반복문 탈출
         break;

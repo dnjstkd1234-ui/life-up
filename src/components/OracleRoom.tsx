@@ -29,15 +29,20 @@ export const OracleRoom: React.FC = () => {
     // Simulate immersive loading time
     const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 4000));
 
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 120000); // 120 seconds
+
     try {
       const [res] = await Promise.all([
         fetch('/.netlify/functions/generateReport', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userStory }),
+          signal: abortController.signal
         }),
         minLoadingTime,
       ]);
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         let errData;
