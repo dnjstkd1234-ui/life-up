@@ -54,57 +54,55 @@ export default async (req: Request) => {
 
     const prompt = `${ORACLE_SYSTEM_PROMPT}\n\n[현재 내담자의 날것의 고민/사연]\n${userStory}`;
 
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    const MAX_RETRIES = 3;
-    let result;
-    let lastError;
-
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        result = await model.generateContentStream({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            maxOutputTokens: 8192
-          },
-          safetySettings: [
-            {
-              category: 'HARM_CATEGORY_HARASSMENT' as any,
-              threshold: 'BLOCK_NONE' as any,
-            },
-            {
-              category: 'HARM_CATEGORY_HATE_SPEECH' as any,
-              threshold: 'BLOCK_NONE' as any,
-            },
-            {
-              category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as any,
-              threshold: 'BLOCK_NONE' as any,
-            },
-            {
-              category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as any,
-              threshold: 'BLOCK_NONE' as any,
-            }
-          ]
-        }, { timeout: 120000 }); // Increase timeout to 120 seconds
-        
-        // 호출 성공 시 반복문 탈출
-        break;
-      } catch (err: any) {
-        console.error(`API Attempt ${attempt} failed:`, err.message || err);
-        lastError = err;
-        if (attempt < MAX_RETRIES) {
-          // 재시도 간 약간의 딜레이 (1초, 2초)
-          await delay(attempt * 1000);
-        }
-      }
-    }
-
-    if (!result) {
-      throw lastError || new Error("Failed to generate content after retries");
-    }
-
     const stream = new ReadableStream({
       async start(controller) {
+        // 클라이언트 연결 유지를 위해 약간의 공백 문자를 먼저 보낼 수도 있지만
+        // ReadableStream 시작 즉시 헤더가 전송되므로 연결이 맺어집니다.
+        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+        const MAX_RETRIES = 3;
+        let result;
+        let lastError;
+
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            result = await model.generateContentStream({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: {
+                maxOutputTokens: 8192
+              },
+              safetySettings: [
+                {
+                  category: 'HARM_CATEGORY_HARASSMENT' as any,
+                  threshold: 'BLOCK_NONE' as any,
+                },
+                {
+                  category: 'HARM_CATEGORY_HATE_SPEECH' as any,
+                  threshold: 'BLOCK_NONE' as any,
+                },
+                {
+                  category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as any,
+                  threshold: 'BLOCK_NONE' as any,
+                },
+                {
+                  category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as any,
+                  threshold: 'BLOCK_NONE' as any,
+                }
+              ]
+            });
+            break;
+          } catch (err: any) {
+            console.error(`API Attempt ${attempt} failed:`, err.message || err);
+            lastError = err;
+            if (attempt < MAX_RETRIES) {
+              await delay(attempt * 2000);
+            }
+          }
+        }
+
         try {
+          if (!result) {
+            throw lastError || new Error("Failed to generate content after retries");
+          }
           for await (const chunk of result.stream) {
             controller.enqueue(new TextEncoder().encode(chunk.text()));
           }

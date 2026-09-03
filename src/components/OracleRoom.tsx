@@ -29,20 +29,15 @@ export const OracleRoom: React.FC = () => {
     // Simulate immersive loading time
     const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 4000));
 
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), 120000); // 120 seconds
-
     try {
       const [res] = await Promise.all([
         fetch('/.netlify/functions/generateReport', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userStory }),
-          signal: abortController.signal
         }),
         minLoadingTime,
       ]);
-      clearTimeout(timeoutId);
 
       if (!res.ok) {
         let errData;
@@ -104,7 +99,12 @@ export const OracleRoom: React.FC = () => {
       }
 
     } catch (err: any) {
-      setError(err.message || '알 수 없는 오류가 발생했습니다.');
+      console.error(err);
+      if (err.message && err.message.includes('진단 중 오류가 발생했습니다.')) {
+        setError(err.message);
+      } else {
+        setError('AI 서버가 일시적으로 혼잡합니다. 잠시 후 다시 시도해 주세요.');
+      }
       setIsDiagnosing(false);
     }
   };
