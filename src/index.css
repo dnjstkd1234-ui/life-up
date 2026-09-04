@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* 강제 Netlify 뱃지 숨김 처리 */
+#netlify-badge,
+.netlify-badge,
+netlify-badge,
+iframe[title*="Netlify"],
+iframe[src*="netlify.com/badge"] {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;

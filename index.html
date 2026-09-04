@@ -8,6 +8,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <style>
+      /* 인라인 CSS로 Netlify 뱃지 차단 */
+      #netlify-badge, netlify-badge { display: none !important; }
+    </style>
+    <script>
+      // DOM 요소를 직접 추적하여 Netlify 뱃지 삭제
+      const removeNetlifyBadge = () => {
+        const badge1 = document.getElementById('netlify-badge');
+        const badge2 = document.querySelector('netlify-badge');
+        if (badge1) { badge1.remove(); }
+        if (badge2) { badge2.remove(); }
+        
+        document.querySelectorAll('iframe').forEach(iframe => {
+          if (iframe.src && iframe.src.includes('netlify.com/badge')) {
+            iframe.remove();
+          }
+        });
+      };
+      
+      window.addEventListener('DOMContentLoaded', removeNetlifyBadge);
+      const observer = new MutationObserver(removeNetlifyBadge);
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    </script>
   </head>
   <body class="bg-stone-950 text-stone-100 antialiased">
     <div id="root"></div>
