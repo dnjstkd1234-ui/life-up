@@ -255,7 +255,7 @@ export const OracleRoom: React.FC = () => {
         <div className="w-full max-w-3xl space-y-8 animate-in fade-in zoom-in duration-700">
           <div className="text-center space-y-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-serif text-stone-100 tracking-tight whitespace-nowrap sm:whitespace-normal">
-              지금 당신이 직면한 가장 뼈아픈 문제는 무엇입니까?
+              현재 직면한 문제의 본질은 무엇입니까?
             </h2>
             <p className="text-stone-400 text-sm sm:text-base">
               자신을 속이지 마십시오. 가장 내밀한 고민부터 현재의 문제점까지, 숨김없이 최대한 구체적으로 작성해야 완벽한 해체가 가능합니다.
@@ -287,7 +287,7 @@ export const OracleRoom: React.FC = () => {
             className="w-full py-5 rounded-2xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-extrabold text-lg sm:text-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all active:scale-[0.98] flex items-center justify-center gap-3"
           >
             <Flame className="w-6 h-6" />
-            <span>나의 왜곡된 틀 깨부수기 (AI 진단 시작)</span>
+            <span>심층 분석 시작</span>
           </button>
         </div>
       )}
